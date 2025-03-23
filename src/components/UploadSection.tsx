@@ -25,7 +25,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
   };
 
   const processFile = async (file: File) => {
-    if (file.type !== 'text/plain') {
+    if (file.type !== 'text/plain' && !file.name.endsWith('.txt')) {
       toast({
         title: "Invalid file format",
         description: "Please upload a WhatsApp .txt file",
@@ -98,7 +98,9 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
   return (
     <div className="w-full max-w-2xl mx-auto mt-8 px-4">
       <div
-        className={`file-drop-zone ${isDragging ? 'active' : ''} ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+        className={`file-drop-zone border-2 border-dashed p-8 rounded-xl transition-all cursor-pointer 
+          ${isDragging ? 'border-apple-blue bg-apple-blue/5' : 'border-apple-gray hover:border-apple-blue/50 hover:bg-apple-gray/5'} 
+          ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -162,18 +164,29 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
       {error && (
         <Alert variant="destructive" className="mt-4">
           <AlertTitle>Error Processing Chat</AlertTitle>
-          <AlertDescription>
-            {error}
+          <AlertDescription className="space-y-2">
+            <p>{error}</p>
+            
             {fileContent && (
               <div className="mt-2">
                 <details className="text-xs">
                   <summary className="cursor-pointer font-medium">Show first few lines of your file</summary>
-                  <pre className="mt-2 bg-black/5 p-2 rounded overflow-x-auto">
-                    {fileContent.split('\n').slice(0, 5).join('\n')}
+                  <pre className="mt-2 bg-black/5 p-2 rounded overflow-x-auto text-xs max-h-40">
+                    {fileContent.split('\n').slice(0, 10).join('\n')}
                   </pre>
                 </details>
               </div>
             )}
+            
+            <div className="text-sm mt-2">
+              <p className="font-medium">Supported Formats:</p>
+              <ul className="list-disc pl-5 mt-1 text-xs space-y-1">
+                <li>[DD/MM/YY, HH:MM:SS] Sender: Message</li>
+                <li>[DD/MM/YY HH:MM:SS] Sender: Message</li>
+                <li>[YYYY/MM/DD, HH:MM:SS] Sender: Message</li>
+                <li>DD/MM/YY, HH:MM - Sender: Message</li>
+              </ul>
+            </div>
           </AlertDescription>
         </Alert>
       )}

@@ -4,11 +4,13 @@
 // Format 2: [DD/MM/YY HH:MM:SS] Sender: Message (no comma)
 // Format 3: DD/MM/YY, HH:MM - Sender: Message (older format)
 // Format 4: DD/MM/YYYY, HH:MM - Sender: Message (older format with 4-digit year)
+// Format 5: [YYYY/MM/DD, HH:MM:SS] Sender: Message (with year first)
 const MESSAGE_PATTERNS = [
   /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/,
   /^\[(\d{1,2}\/\d{1,2}\/\d{2,4})\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/,
   /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2})(?:\s)?-(?:\s)?([^:]+):\s(.+)$/,
-  /^(\d{1,2}\/\d{1,2}\/\d{2,4})\s(\d{1,2}:\d{2})(?:\s)?-(?:\s)?([^:]+):\s(.+)$/
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4})\s(\d{1,2}:\d{2})(?:\s)?-(?:\s)?([^:]+):\s(.+)$/,
+  /^\[(\d{4}\/\d{1,2}\/\d{1,2}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/
 ];
 
 // Interface for parsed message
@@ -42,20 +44,36 @@ const containsEmoji = (text: string): boolean => {
  */
 const parseWhatsAppDate = (datePart: string, timePart: string): Date => {
   try {
-    const [day, month, year] = datePart.split('/');
-    const fullYear = year.length === 2 ? `20${year}` : year;
-    
-    // Handle different time formats (HH:MM or HH:MM:SS)
-    const timeComponents = timePart.split(':');
-    let timeString = timePart;
-    
-    if (timeComponents.length === 2) {
-      timeString = `${timePart}:00`; // Add seconds if not present
+    // Check if the date is in YYYY/MM/DD format
+    if (datePart.match(/^\d{4}\/\d{1,2}\/\d{1,2}$/)) {
+      const [year, month, day] = datePart.split('/');
+      
+      // Handle different time formats (HH:MM or HH:MM:SS)
+      const timeComponents = timePart.split(':');
+      let timeString = timePart;
+      
+      if (timeComponents.length === 2) {
+        timeString = `${timePart}:00`; // Add seconds if not present
+      }
+      
+      return new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timeString}`);
+    } else {
+      // Standard DD/MM/YY(YY) format
+      const [day, month, year] = datePart.split('/');
+      const fullYear = year.length === 2 ? `20${year}` : year;
+      
+      // Handle different time formats (HH:MM or HH:MM:SS)
+      const timeComponents = timePart.split(':');
+      let timeString = timePart;
+      
+      if (timeComponents.length === 2) {
+        timeString = `${timePart}:00`; // Add seconds if not present
+      }
+      
+      return new Date(`${fullYear}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${timeString}`);
     }
-    
-    return new Date(`${fullYear}-${month}-${day}T${timeString}`);
   } catch (error) {
-    console.error("Error parsing date:", error);
+    console.error("Error parsing date:", error, "for date part:", datePart, "time part:", timePart);
     return new Date(); // Fallback to current date
   }
 };
@@ -64,7 +82,9 @@ const parseWhatsAppDate = (datePart: string, timePart: string): Date => {
  * Parse WhatsApp chat text into structured data
  */
 export const parseWhatsAppChat = (chatText: string): ParsedChat => {
-  const lines = chatText.split('\n');
+  // Clean the input by normalizing line endings
+  const normalizedText = chatText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalizedText.split('\n');
   const messages: ParsedMessage[] = [];
   const participantsSet = new Set<string>();
   
@@ -73,6 +93,7 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
 
   // Try to detect non-message system information lines to exclude
   const systemMessagePatterns = [
+    /^Messages and calls are end-to-end encrypted/i,
     /^Messages to this group are now secured with end-to-end encryption/i,
     /^.* created group/i,
     /^.* changed the subject from/i,
@@ -87,8 +108,13 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
     /^.* changed their phone number/i
   ];
 
+  // Debug information
+  console.log("Total lines before processing:", lines.length);
+  let matchedLines = 0;
+  let unmatchedLines = 0;
+
   // Process each line in the chat
-  lines.forEach(line => {
+  lines.forEach((line, index) => {
     // Skip empty lines
     if (!line.trim()) {
       return;
@@ -107,6 +133,7 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
       
       if (match) {
         matched = true;
+        matchedLines++;
         const [, datePart, timePart, sender, content] = match;
         
         // Parse date and time
@@ -147,14 +174,23 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
       }
     }
     
-    if (!matched && process.env.NODE_ENV !== 'production') {
-      console.debug('No pattern match for line:', line);
+    if (!matched) {
+      unmatchedLines++;
+      if (process.env.NODE_ENV !== 'production' && index < 20) {
+        // Only log the first 20 unmatched lines to avoid excessive logging
+        console.debug('No pattern match for line:', line);
+      }
     }
   });
 
   // Add debug information to help diagnose issues
+  console.log(`Processed lines: ${lines.length}, Matched: ${matchedLines}, Unmatched: ${unmatchedLines}`);
+  
   if (messages.length === 0) {
     console.log('No messages parsed. Sample lines:', lines.slice(0, 5));
+    console.log('Message patterns tried:', MESSAGE_PATTERNS.map(p => p.toString()));
+  } else {
+    console.log(`Successfully parsed ${messages.length} messages from ${participantsSet.size} participants`);
   }
 
   return {
