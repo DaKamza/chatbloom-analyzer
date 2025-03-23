@@ -118,3 +118,47 @@
 .animate-scale-fade-in {
   animation: scale-fade-in 0.4s ease-out forwards;
 }
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Card transition effects */
+.card-transition {
+  transition: all 0.3s ease;
+}
+
+.card-transition:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Improve tab styling */
+.tabs-custom [data-state="active"] {
+  @apply bg-white shadow-md;
+}
+
+/* Emoji display box */
+.emoji-box {
+  @apply flex items-center justify-center text-4xl p-3 bg-white rounded-lg shadow-sm;
+  width: 70px;
+  height: 70px;
+}
+
+/* Enhanced gradient backgrounds */
+.bg-gradient-soft {
+  @apply bg-gradient-to-br from-white to-apple-gray/30;
+}
+
+.bg-gradient-blue {
+  @apply bg-gradient-to-br from-apple-blue/10 to-apple-light-blue/5;
+}

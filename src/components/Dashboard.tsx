@@ -11,7 +11,8 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ConflictDetection from './ConflictDetection';
 import RelationshipAdvice from './RelationshipAdvice';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Smile } from 'lucide-react';
+import EmojiAnalysis from './EmojiAnalysis';
 
 interface DashboardProps {
   analysis: ChatAnalysis;
@@ -69,6 +70,13 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
             Conflict Analysis
           </TabsTrigger>
           <TabsTrigger 
+            value="emojis" 
+            className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
+          >
+            <Smile className="w-4 h-4 mr-1" />
+            Emoji Analysis
+          </TabsTrigger>
+          <TabsTrigger 
             value="advice" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
           >
@@ -83,6 +91,10 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         
         <TabsContent value="conflicts" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
           <ConflictDetection analysis={analysis} parsedChat={parsedChat} />
+        </TabsContent>
+        
+        <TabsContent value="emojis" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+          <EmojiAnalysis analysis={analysis} parsedChat={parsedChat} />
         </TabsContent>
         
         <TabsContent value="advice" className="mt-0 focus-visible:outline-none focus-visible:ring-0">

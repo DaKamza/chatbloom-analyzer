@@ -1,4 +1,3 @@
-
 import { ParsedChat, ParsedMessage } from './chatParser';
 
 interface MessageCount {
@@ -17,6 +16,11 @@ interface ResponseTime {
 
 interface ConversationStarter {
   [participant: string]: number;
+}
+
+interface EmojiData {
+  emoji: string;
+  count: number;
 }
 
 export interface ChatAnalysis {
@@ -39,12 +43,22 @@ export interface ChatAnalysis {
     total: number;
     byParticipant: MessageCount;
   };
+  mostFrequentEmojis: EmojiData[];
   chatDuration: {
     days: number;
     months: number;
     years: number;
   };
 }
+
+/**
+ * Extract emojis from text
+ */
+const extractEmojis = (text: string): string[] => {
+  const emojiRegex = /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+  const matches = text.match(emojiRegex);
+  return matches || [];
+};
 
 /**
  * Analyze chat data to extract insights
@@ -94,6 +108,9 @@ export const analyzeChatData = (parsedChat: ParsedChat): ChatAnalysis => {
   // Define new conversation as messages more than 3 hours apart
   const NEW_CONVERSATION_THRESHOLD = 3 * 60 * 60 * 1000; // 3 hours in milliseconds
   
+  // Initialize emoji tracking
+  const emojiFrequency: {[emoji: string]: number} = {};
+  
   // Process each message
   messages.forEach((message, index) => {
     const { sender, content, words, timestamp, hasEmoji } = message;
@@ -110,6 +127,12 @@ export const analyzeChatData = (parsedChat: ParsedChat): ChatAnalysis => {
     // Update emoji count
     if (hasEmoji) {
       emojiCountByParticipant[sender]++;
+      
+      // Extract and count individual emojis
+      const emojisInMessage = extractEmojis(content);
+      emojisInMessage.forEach(emoji => {
+        emojiFrequency[emoji] = (emojiFrequency[emoji] || 0) + 1;
+      });
     }
     
     // Update word frequency
@@ -215,6 +238,11 @@ export const analyzeChatData = (parsedChat: ParsedChat): ChatAnalysis => {
   const durationMonths = Math.floor(durationDays / 30);
   const durationYears = Math.floor(durationDays / 365);
   
+  // Process emoji frequency data
+  const mostFrequentEmojis = Object.entries(emojiFrequency)
+    .sort((a, b) => b[1] - a[1])
+    .map(([emoji, count]) => ({ emoji, count }));
+  
   return {
     totalMessages,
     messageCountByParticipant,
@@ -229,6 +257,7 @@ export const analyzeChatData = (parsedChat: ParsedChat): ChatAnalysis => {
       total: Object.values(emojiCountByParticipant).reduce((a, b) => a + b, 0),
       byParticipant: emojiCountByParticipant
     },
+    mostFrequentEmojis,
     chatDuration: {
       days: durationDays,
       months: durationMonths,

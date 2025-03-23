@@ -11,7 +11,9 @@ import {
   Clock, 
   TrendingUp,
   UserCheck,
-  MessagesSquare 
+  MessagesSquare,
+  Award,
+  Lightbulb
 } from 'lucide-react';
 
 interface RelationshipAdviceProps {
@@ -137,17 +139,32 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
       });
     }
     
-    // General positive advice
+    // If no specific advice was generated, add some general ones
+    if (advice.length === 0) {
+      advice.push({
+        icon: <UserCheck className="w-6 h-6 text-teal-500" />,
+        title: "Healthy Chat Pattern",
+        description: "You maintain regular communication and respond to each other consistently. This shows a solid foundation for your relationship."
+      });
+      
+      advice.push({
+        icon: <Clock className="w-6 h-6 text-indigo-500" />,
+        title: "Patience Is Key",
+        description: `Remember that different people have different texting habits. Everyone has their own communication style.`
+      });
+    }
+    
+    // Always add some general positive advice
     advice.push({
-      icon: <UserCheck className="w-6 h-6 text-teal-500" />,
-      title: "Healthy Chat Pattern",
-      description: "You maintain regular communication and respond to each other consistently. This shows a solid foundation for your relationship."
+      icon: <Award className="w-6 h-6 text-amber-500" />,
+      title: "Celebrate Your Connection",
+      description: "Your ongoing conversation over time shows commitment to staying connected, which is valuable in any relationship."
     });
     
     advice.push({
-      icon: <Clock className="w-6 h-6 text-indigo-500" />,
-      title: "Patience Is Key",
-      description: `Remember that different people have different texting habits. ${slowerResponder} might be busy or prefer to think before responding.`
+      icon: <Lightbulb className="w-6 h-6 text-yellow-500" />,
+      title: "Quality Over Quantity",
+      description: "Focus on meaningful exchanges rather than just message count. A thoughtful response is worth more than ten quick replies."
     });
     
     return advice;
@@ -211,7 +228,7 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
       <AnalysisCard title="Relationship Advice">
         <div className="space-y-5">
           {advice.map((item, index) => (
-            <div key={index} className="flex gap-4 p-4 bg-white/50 rounded-lg">
+            <div key={index} className="flex gap-4 p-4 bg-white/50 rounded-lg hover:shadow-sm transition-shadow">
               <div className="shrink-0 mt-1">
                 {item.icon}
               </div>
@@ -226,14 +243,14 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
       
       <AnalysisCard title="Communication Strengths">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white/50 p-4 rounded-lg">
+          <div className="bg-white/50 p-4 rounded-lg hover:bg-white/70 transition-colors">
             <h4 className="text-sm font-medium mb-2 text-apple-black">Consistent Communication</h4>
             <p className="text-sm text-apple-dark-gray">
               You've maintained conversation over {analysis.chatDuration.days} days with regular exchanges.
             </p>
           </div>
           
-          <div className="bg-white/50 p-4 rounded-lg">
+          <div className="bg-white/50 p-4 rounded-lg hover:bg-white/70 transition-colors">
             <h4 className="text-sm font-medium mb-2 text-apple-black">Engagement Level</h4>
             <p className="text-sm text-apple-dark-gray">
               With {(analysis.totalMessages / analysis.chatDuration.days).toFixed(1)} messages per day on average, 
@@ -241,20 +258,52 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
             </p>
           </div>
           
-          {/* Add more strength cards based on the data */}
-          <div className="bg-white/50 p-4 rounded-lg">
+          <div className="bg-white/50 p-4 rounded-lg hover:bg-white/70 transition-colors">
             <h4 className="text-sm font-medium mb-2 text-apple-black">Vocabulary Richness</h4>
             <p className="text-sm text-apple-dark-gray">
               You use a diverse range of words, showing thoughtfulness in your communication.
             </p>
           </div>
           
-          <div className="bg-white/50 p-4 rounded-lg">
+          <div className="bg-white/50 p-4 rounded-lg hover:bg-white/70 transition-colors">
             <h4 className="text-sm font-medium mb-2 text-apple-black">Expression</h4>
             <p className="text-sm text-apple-dark-gray">
               Your use of {analysis.emojiUsage.total} emojis shows emotional expressiveness in your chat.
             </p>
           </div>
+        </div>
+      </AnalysisCard>
+      
+      <AnalysisCard title="Actionable Tips">
+        <div className="p-5 rounded-lg bg-gradient-to-r from-apple-blue/10 to-apple-light-blue/10 border border-apple-blue/10">
+          <h3 className="text-lg font-medium text-apple-black mb-3">How to Improve Your Communication</h3>
+          
+          <ul className="space-y-3">
+            <li className="flex gap-2">
+              <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">1</div>
+              <p className="text-sm">
+                <span className="font-medium">Active listening:</span> Acknowledge messages with thoughtful responses that address what was said.
+              </p>
+            </li>
+            <li className="flex gap-2">
+              <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">2</div>
+              <p className="text-sm">
+                <span className="font-medium">Express emotions clearly:</span> Use emojis or explicit statements about your feelings to avoid misunderstandings.
+              </p>
+            </li>
+            <li className="flex gap-2">
+              <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">3</div>
+              <p className="text-sm">
+                <span className="font-medium">Balance initiation:</span> Take turns starting conversations to create a reciprocal dynamic.
+              </p>
+            </li>
+            <li className="flex gap-2">
+              <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">4</div>
+              <p className="text-sm">
+                <span className="font-medium">Be mindful of response times:</span> If you'll be delayed in responding, a quick "busy now, will reply later" message helps.
+              </p>
+            </li>
+          </ul>
         </div>
       </AnalysisCard>
     </div>

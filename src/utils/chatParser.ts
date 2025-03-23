@@ -1,4 +1,3 @@
-
 // Regular expression patterns to match various WhatsApp message formats
 // Format 1: [DD/MM/YY, HH:MM:SS] Sender: Message
 // Format 2: [DD/MM/YY HH:MM:SS] Sender: Message (no comma)
@@ -20,6 +19,7 @@ export interface ParsedMessage {
   content: string;
   words: string[];
   hasEmoji: boolean;
+  emojis: string[];
 }
 
 // Interface for parsed chat
@@ -29,6 +29,15 @@ export interface ParsedChat {
   startDate: Date;
   endDate: Date;
 }
+
+/**
+ * Extract emojis from text
+ */
+const extractEmojis = (text: string): string[] => {
+  const emojiRegex = /[\u{1F300}-\u{1F6FF}\u{1F900}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu;
+  const matches = text.match(emojiRegex);
+  return matches || [];
+};
 
 /**
  * Check if a string contains emoji
@@ -158,6 +167,9 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
           .split(/\s+/)
           .filter(word => word.length > 0);
         
+        // Extract emojis
+        const emojis = extractEmojis(content);
+        
         // Check for emoji
         const hasEmoji = containsEmoji(content);
         
@@ -167,7 +179,8 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
           sender: sender.trim(),
           content,
           words,
-          hasEmoji
+          hasEmoji,
+          emojis
         });
         
         break; // Stop once a pattern matches
