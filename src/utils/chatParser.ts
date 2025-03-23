@@ -1,7 +1,15 @@
 
-// Regular expression pattern to match WhatsApp message format
-// Format: [DD/MM/YY, HH:MM:SS] Sender: Message
-const MESSAGE_PATTERN = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/;
+// Regular expression patterns to match various WhatsApp message formats
+// Format 1: [DD/MM/YY, HH:MM:SS] Sender: Message
+// Format 2: [DD/MM/YY HH:MM:SS] Sender: Message (no comma)
+// Format 3: DD/MM/YY, HH:MM - Sender: Message (older format)
+// Format 4: DD/MM/YYYY, HH:MM - Sender: Message (older format with 4-digit year)
+const MESSAGE_PATTERNS = [
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/,
+  /^\[(\d{1,2}\/\d{1,2}\/\d{2,4})\s(\d{1,2}:\d{2}(?::\d{2})?)\]\s([^:]+):\s(.+)$/,
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4}),\s(\d{1,2}:\d{2})(?:\s)?-(?:\s)?([^:]+):\s(.+)$/,
+  /^(\d{1,2}\/\d{1,2}\/\d{2,4})\s(\d{1,2}:\d{2})(?:\s)?-(?:\s)?([^:]+):\s(.+)$/
+];
 
 // Interface for parsed message
 export interface ParsedMessage {
@@ -30,6 +38,29 @@ const containsEmoji = (text: string): boolean => {
 };
 
 /**
+ * Parse a date string from various WhatsApp date formats
+ */
+const parseWhatsAppDate = (datePart: string, timePart: string): Date => {
+  try {
+    const [day, month, year] = datePart.split('/');
+    const fullYear = year.length === 2 ? `20${year}` : year;
+    
+    // Handle different time formats (HH:MM or HH:MM:SS)
+    const timeComponents = timePart.split(':');
+    let timeString = timePart;
+    
+    if (timeComponents.length === 2) {
+      timeString = `${timePart}:00`; // Add seconds if not present
+    }
+    
+    return new Date(`${fullYear}-${month}-${day}T${timeString}`);
+  } catch (error) {
+    console.error("Error parsing date:", error);
+    return new Date(); // Fallback to current date
+  }
+};
+
+/**
  * Parse WhatsApp chat text into structured data
  */
 export const parseWhatsAppChat = (chatText: string): ParsedChat => {
@@ -40,51 +71,91 @@ export const parseWhatsAppChat = (chatText: string): ParsedChat => {
   let earliestDate: Date | null = null;
   let latestDate: Date | null = null;
 
+  // Try to detect non-message system information lines to exclude
+  const systemMessagePatterns = [
+    /^Messages to this group are now secured with end-to-end encryption/i,
+    /^.* created group/i,
+    /^.* changed the subject from/i,
+    /^.* added/i,
+    /^.* joined using this group's invite link/i,
+    /^.* left/i,
+    /^.* removed/i,
+    /^.* changed this group's icon/i,
+    /^.* changed the group description/i,
+    /^You created group/i,
+    /^Group notification/i,
+    /^.* changed their phone number/i
+  ];
+
+  // Process each line in the chat
   lines.forEach(line => {
-    const match = line.match(MESSAGE_PATTERN);
+    // Skip empty lines
+    if (!line.trim()) {
+      return;
+    }
     
-    if (match) {
-      const [, datePart, timePart, sender, content] = match;
+    // Skip system messages
+    if (systemMessagePatterns.some(pattern => pattern.test(line))) {
+      return;
+    }
+    
+    // Try each message pattern until one matches
+    let matched = false;
+    
+    for (const pattern of MESSAGE_PATTERNS) {
+      const match = line.match(pattern);
       
-      // Parse date and time
-      const [day, month, year] = datePart.split('/');
-      const fullYear = year.length === 2 ? `20${year}` : year;
-      
-      // Create timestamp
-      const timestamp = new Date(`${fullYear}-${month}-${day}T${timePart}`);
-      
-      // Update earliest and latest dates
-      if (!earliestDate || timestamp < earliestDate) {
-        earliestDate = timestamp;
+      if (match) {
+        matched = true;
+        const [, datePart, timePart, sender, content] = match;
+        
+        // Parse date and time
+        const timestamp = parseWhatsAppDate(datePart, timePart);
+        
+        // Update earliest and latest dates
+        if (!earliestDate || timestamp < earliestDate) {
+          earliestDate = timestamp;
+        }
+        
+        if (!latestDate || timestamp > latestDate) {
+          latestDate = timestamp;
+        }
+        
+        // Add participant to set
+        participantsSet.add(sender.trim());
+        
+        // Split content into words
+        const words = content
+          .toLowerCase()
+          .replace(/[^\w\s]/gi, ' ')
+          .split(/\s+/)
+          .filter(word => word.length > 0);
+        
+        // Check for emoji
+        const hasEmoji = containsEmoji(content);
+        
+        // Add parsed message to array
+        messages.push({
+          timestamp,
+          sender: sender.trim(),
+          content,
+          words,
+          hasEmoji
+        });
+        
+        break; // Stop once a pattern matches
       }
-      
-      if (!latestDate || timestamp > latestDate) {
-        latestDate = timestamp;
-      }
-      
-      // Add participant to set
-      participantsSet.add(sender.trim());
-      
-      // Split content into words
-      const words = content
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, ' ')
-        .split(/\s+/)
-        .filter(word => word.length > 0);
-      
-      // Check for emoji
-      const hasEmoji = containsEmoji(content);
-      
-      // Add parsed message to array
-      messages.push({
-        timestamp,
-        sender: sender.trim(),
-        content,
-        words,
-        hasEmoji
-      });
+    }
+    
+    if (!matched && process.env.NODE_ENV !== 'production') {
+      console.debug('No pattern match for line:', line);
     }
   });
+
+  // Add debug information to help diagnose issues
+  if (messages.length === 0) {
+    console.log('No messages parsed. Sample lines:', lines.slice(0, 5));
+  }
 
   return {
     messages,

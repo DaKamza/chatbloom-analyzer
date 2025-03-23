@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { parseWhatsAppChat } from '@/utils/chatParser';
 import { toast } from '@/components/ui/use-toast';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface UploadSectionProps {
   onChatDataParsed: (chatData: ReturnType<typeof parseWhatsAppChat>) => void;
@@ -10,6 +11,8 @@ interface UploadSectionProps {
 const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -32,12 +35,19 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
     }
 
     setIsLoading(true);
+    setError(null);
     
     try {
       const text = await file.text();
+      setFileContent(text);
+      
+      // Log first few lines for debugging
+      console.log("File preview:", text.split('\n').slice(0, 10));
+      
       const parsedData = parseWhatsAppChat(text);
       
       if (parsedData.messages.length === 0) {
+        setError("Couldn't parse any messages from the file. Make sure it's a valid WhatsApp chat export.");
         toast({
           title: "No messages found",
           description: "Couldn't parse any messages from the file. Make sure it's a valid WhatsApp chat export.",
@@ -54,12 +64,13 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
       
       onChatDataParsed(parsedData);
     } catch (error) {
+      console.error("Error processing file:", error);
+      setError("Something went wrong while processing the chat file.");
       toast({
         title: "Error processing file",
         description: "Something went wrong while processing the chat file.",
         variant: "destructive",
       });
-      console.error("Error processing file:", error);
     }
     
     setIsLoading(false);
@@ -147,6 +158,25 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
           )}
         </div>
       </div>
+      
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertTitle>Error Processing Chat</AlertTitle>
+          <AlertDescription>
+            {error}
+            {fileContent && (
+              <div className="mt-2">
+                <details className="text-xs">
+                  <summary className="cursor-pointer font-medium">Show first few lines of your file</summary>
+                  <pre className="mt-2 bg-black/5 p-2 rounded overflow-x-auto">
+                    {fileContent.split('\n').slice(0, 5).join('\n')}
+                  </pre>
+                </details>
+              </div>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
       
       <div className="text-center mt-8 text-sm text-apple-dark-gray">
         <h4 className="font-medium mb-2">How to export your WhatsApp chat:</h4>

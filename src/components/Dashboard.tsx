@@ -3,6 +3,7 @@ import React from 'react';
 import { ChatAnalysis } from '@/utils/analyzeData';
 import { ParsedChat } from '@/utils/chatParser';
 import MessageStats from './MessageStats';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 interface DashboardProps {
   analysis: ChatAnalysis;
@@ -11,6 +12,8 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) => {
+  const hasLimitedData = parsedChat.messages.length < 50;
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-10 animate-fade-in">
       <div className="flex justify-between items-center mb-8">
@@ -28,6 +31,16 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           Analyze Another Chat
         </button>
       </div>
+      
+      {hasLimitedData && (
+        <Alert className="mb-6">
+          <AlertTitle>Limited Data Analysis</AlertTitle>
+          <AlertDescription>
+            Your chat contains fewer than 50 messages. For more comprehensive insights, 
+            try uploading a chat with more messages.
+          </AlertDescription>
+        </Alert>
+      )}
       
       <MessageStats analysis={analysis} parsedChat={parsedChat} />
     </div>
