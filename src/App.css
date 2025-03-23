@@ -1,42 +1,120 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    opacity: 0.7;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Gradient text */
+.gradient-text {
+  @apply bg-gradient-to-r from-apple-blue to-apple-light-blue bg-clip-text text-transparent;
+}
+
+/* Updated glass effect */
+.glass-effect {
+  @apply bg-white/80 backdrop-blur-apple border border-white/20 shadow-apple-card;
+  transition: all 0.3s ease;
+}
+
+.glass-effect:hover {
+  @apply bg-white/90 border-white/30 shadow-lg;
+  transform: translateY(-2px);
+}
+
+/* Improved scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-apple-blue/20 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-apple-blue/30;
+}
+
+/* Card hover effect */
+.hover-lift {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
+}
+
+/* Improved button styles */
+.apple-button {
+  @apply bg-apple-blue text-white px-6 py-3 rounded-full font-medium;
+  transition: all 0.2s ease;
+}
+
+.apple-button:hover {
+  @apply bg-apple-blue/90;
+  transform: scale(1.02);
+}
+
+.apple-button:active {
+  transform: scale(0.98);
+}
+
+/* Improved tag styles */
+.tag {
+  @apply px-3 py-1 rounded-full text-sm bg-apple-gray/50 border border-apple-gray/70;
+  transition: all 0.2s ease;
+}
+
+.tag:hover {
+  @apply bg-apple-gray/70;
+}
+
+/* Additional animations */
+@keyframes fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-.card {
-  padding: 2em;
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out forwards;
 }
 
-.read-the-docs {
-  color: #888;
+@keyframes scale-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-fade-in {
+  animation: scale-fade-in 0.4s ease-out forwards;
 }
