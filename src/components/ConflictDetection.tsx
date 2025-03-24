@@ -11,6 +11,7 @@ import {
   AccordionTrigger 
 } from '@/components/ui/accordion';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 interface ConflictDetectionProps {
   analysis: ChatAnalysis;
@@ -176,8 +177,7 @@ const ConflictDetection: React.FC<ConflictDetectionProps> = ({ analysis, parsedC
             </div>
             <Progress 
               value={Number(calculateConflictRate())} 
-              className="h-2 mb-4" 
-              indicatorClassName="bg-gradient-to-r from-green-500 to-red-500" 
+              className={cn("h-2 mb-4", "[&>div]:bg-gradient-to-r [&>div]:from-green-500 [&>div]:to-red-500")} 
             />
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -203,8 +203,13 @@ const ConflictDetection: React.FC<ConflictDetectionProps> = ({ analysis, parsedC
             </div>
             <Progress 
               value={resolutionRate} 
-              className="h-2 mb-4" 
-              indicatorClassName={`bg-${resolutionRate > 60 ? 'green' : resolutionRate > 30 ? 'amber' : 'red'}-500`}
+              className={cn("h-2 mb-4", 
+                resolutionRate > 60 
+                  ? "[&>div]:bg-green-500" 
+                  : resolutionRate > 30 
+                    ? "[&>div]:bg-amber-500" 
+                    : "[&>div]:bg-red-500"
+              )}
             />
             
             <div className="flex items-center mt-4">
