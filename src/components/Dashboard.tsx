@@ -11,7 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ConflictDetection from './ConflictDetection';
 import RelationshipAdvice from './RelationshipAdvice';
-import { Sparkles, Smile } from 'lucide-react';
+import { Sparkles, Smile, AlertTriangle, BarChart } from 'lucide-react';
 import EmojiAnalysis from './EmojiAnalysis';
 
 interface DashboardProps {
@@ -55,18 +55,20 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </Alert>
       )}
       
-      <Tabs defaultValue="stats" className="w-full">
+      <Tabs defaultValue="conflicts" className="w-full">
         <TabsList className="w-full max-w-md mx-auto mb-8 bg-apple-gray/50 p-1 rounded-full">
           <TabsTrigger 
             value="stats" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
           >
+            <BarChart className="w-4 h-4 mr-1" />
             Message Stats
           </TabsTrigger>
           <TabsTrigger 
             value="conflicts" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
           >
+            <AlertTriangle className="w-4 h-4 mr-1" />
             Conflict Analysis
           </TabsTrigger>
           <TabsTrigger 
@@ -81,7 +83,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
           >
             <Sparkles className="w-4 h-4 mr-1" />
-            AI Advice
+            Resolution Advice
           </TabsTrigger>
         </TabsList>
         

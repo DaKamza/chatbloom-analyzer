@@ -13,7 +13,11 @@ import {
   UserCheck,
   MessagesSquare,
   Award,
-  Lightbulb
+  Lightbulb,
+  Zap,
+  Shield,
+  ArrowUpRight,
+  BookOpen
 } from 'lucide-react';
 
 interface RelationshipAdviceProps {
@@ -139,8 +143,21 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
       });
     }
     
+    // Always add conflict resolution advice
+    advice.push({
+      icon: <Shield className="w-6 h-6 text-blue-500" />,
+      title: "Conflict Resolution Strategy",
+      description: "When disagreements arise, try to use 'I' statements rather than 'you' statements. For example, say 'I feel frustrated when...' instead of 'You always...'"
+    });
+    
+    advice.push({
+      icon: <Zap className="w-6 h-6 text-yellow-500" />,
+      title: "Cooling Off Period",
+      description: "If a conversation is becoming heated, it's okay to take a short break. Let the other person know you need some time to think before continuing."
+    });
+    
     // If no specific advice was generated, add some general ones
-    if (advice.length === 0) {
+    if (advice.length < 3) {
       advice.push({
         icon: <UserCheck className="w-6 h-6 text-teal-500" />,
         title: "Healthy Chat Pattern",
@@ -175,7 +192,7 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
   return (
     <div className="space-y-6">
       <AnalysisCard 
-        title="AI Relationship Insights" 
+        title="Relationship Health Insights" 
         gradient
         className="md:col-span-2"
       >
@@ -225,9 +242,9 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
         </div>
       </AnalysisCard>
       
-      <AnalysisCard title="Relationship Advice">
+      <AnalysisCard title="Conflict Resolution Advice">
         <div className="space-y-5">
-          {advice.map((item, index) => (
+          {advice.slice(0, 6).map((item, index) => (
             <div key={index} className="flex gap-4 p-4 bg-white/50 rounded-lg hover:shadow-sm transition-shadow">
               <div className="shrink-0 mt-1">
                 {item.icon}
@@ -274,7 +291,7 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
         </div>
       </AnalysisCard>
       
-      <AnalysisCard title="Actionable Tips">
+      <AnalysisCard title="Conflict Resolution Strategies">
         <div className="p-5 rounded-lg bg-gradient-to-r from-apple-blue/10 to-apple-light-blue/10 border border-apple-blue/10">
           <h3 className="text-lg font-medium text-apple-black mb-3">How to Improve Your Communication</h3>
           
@@ -282,28 +299,62 @@ const RelationshipAdvice: React.FC<RelationshipAdviceProps> = ({ analysis, parse
             <li className="flex gap-2">
               <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">1</div>
               <p className="text-sm">
-                <span className="font-medium">Active listening:</span> Acknowledge messages with thoughtful responses that address what was said.
+                <span className="font-medium">Use "I" statements:</span> Replace "You always..." with "I feel..." to express how situations affect you without sounding accusatory.
               </p>
             </li>
             <li className="flex gap-2">
               <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">2</div>
               <p className="text-sm">
-                <span className="font-medium">Express emotions clearly:</span> Use emojis or explicit statements about your feelings to avoid misunderstandings.
+                <span className="font-medium">Active listening:</span> Acknowledge the other person's perspective before sharing your own. Repeat back what they've said to confirm understanding.
               </p>
             </li>
             <li className="flex gap-2">
               <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">3</div>
               <p className="text-sm">
-                <span className="font-medium">Balance initiation:</span> Take turns starting conversations to create a reciprocal dynamic.
+                <span className="font-medium">Take breaks when needed:</span> If emotions run high, it's okay to say, "I need some time to think about this. Can we talk about it later?"
               </p>
             </li>
             <li className="flex gap-2">
               <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">4</div>
               <p className="text-sm">
-                <span className="font-medium">Be mindful of response times:</span> If you'll be delayed in responding, a quick "busy now, will reply later" message helps.
+                <span className="font-medium">Ask open questions:</span> Use "what," "how," and "tell me more" to encourage deeper conversation instead of yes/no questions.
+              </p>
+            </li>
+            <li className="flex gap-2">
+              <div className="rounded-full w-5 h-5 bg-apple-blue/20 flex items-center justify-center text-apple-blue flex-shrink-0 mt-0.5">5</div>
+              <p className="text-sm">
+                <span className="font-medium">Avoid absolutist language:</span> Words like "always," "never," and "every time" can escalate conflicts. Try "sometimes" or "often" instead.
               </p>
             </li>
           </ul>
+        </div>
+      </AnalysisCard>
+      
+      <AnalysisCard title="Action Steps">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white/60 p-4 rounded-lg border border-apple-gray/20 hover:shadow-sm transition-shadow">
+            <ArrowUpRight className="w-5 h-5 text-apple-blue mb-2" />
+            <h4 className="text-sm font-medium mb-1 text-apple-black">This Week</h4>
+            <p className="text-sm text-apple-dark-gray">
+              Notice one trigger word you use often and try to substitute it with a more neutral alternative.
+            </p>
+          </div>
+          
+          <div className="bg-white/60 p-4 rounded-lg border border-apple-gray/20 hover:shadow-sm transition-shadow">
+            <BookOpen className="w-5 h-5 text-apple-blue mb-2" />
+            <h4 className="text-sm font-medium mb-1 text-apple-black">This Month</h4>
+            <p className="text-sm text-apple-dark-gray">
+              Practice pausing before responding when you feel emotionally reactive to a message.
+            </p>
+          </div>
+          
+          <div className="bg-white/60 p-4 rounded-lg border border-apple-gray/20 hover:shadow-sm transition-shadow">
+            <Lightbulb className="w-5 h-5 text-apple-blue mb-2" />
+            <h4 className="text-sm font-medium mb-1 text-apple-black">Long Term</h4>
+            <p className="text-sm text-apple-dark-gray">
+              Have a conversation about communication preferences and how to handle disagreements effectively.
+            </p>
+          </div>
         </div>
       </AnalysisCard>
     </div>

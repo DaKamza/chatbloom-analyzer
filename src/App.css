@@ -162,3 +162,63 @@
 .bg-gradient-blue {
   @apply bg-gradient-to-br from-apple-blue/10 to-apple-light-blue/5;
 }
+
+/* New styles for conflict analysis */
+.conflict-message {
+  @apply border-l-4 border-red-400 pl-3 py-1;
+}
+
+.resolution-message {
+  @apply border-l-4 border-green-400 pl-3 py-1;
+}
+
+/* Enhanced progress bars */
+.progress-bar {
+  @apply h-2 rounded-full overflow-hidden bg-gray-100;
+}
+
+.progress-value {
+  @apply h-full;
+  transition: width 0.5s ease-out;
+}
+
+/* Sentiment indicators */
+.sentiment-positive {
+  @apply text-green-500;
+}
+
+.sentiment-neutral {
+  @apply text-gray-500;
+}
+
+.sentiment-negative {
+  @apply text-red-500;
+}
+
+/* Clean dividers */
+.clean-divider {
+  @apply h-px bg-gradient-to-r from-transparent via-apple-gray/30 to-transparent my-6;
+}
+
+/* Chat bubble styles */
+.chat-bubble {
+  @apply rounded-lg p-3 max-w-[80%] relative mb-2;
+}
+
+.chat-bubble-sender {
+  @apply bg-blue-50 border border-blue-100 ml-auto;
+}
+
+.chat-bubble-receiver {
+  @apply bg-gray-50 border border-gray-100;
+}
+
+/* Card with hover animation */
+.insight-card {
+  @apply bg-white rounded-lg p-4 border border-apple-gray/20 transition-all duration-300;
+}
+
+.insight-card:hover {
+  @apply shadow-md border-apple-blue/20 bg-white/90;
+  transform: translateY(-2px);
+}

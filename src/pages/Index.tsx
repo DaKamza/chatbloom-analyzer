@@ -5,7 +5,7 @@ import UploadSection from '@/components/UploadSection';
 import Dashboard from '@/components/Dashboard';
 import { ParsedChat } from '@/utils/chatParser';
 import { analyzeChatData, ChatAnalysis } from '@/utils/analyzeData';
-import { MessageSquare, Sparkles } from 'lucide-react';
+import { MessageSquare, Sparkles, AlertTriangle } from 'lucide-react';
 
 const Index = () => {
   const [parsedChat, setParsedChat] = useState<ParsedChat | null>(null);
@@ -46,7 +46,7 @@ const Index = () => {
               </h1>
               <p className="text-xl text-apple-dark-gray max-w-2xl mx-auto">
                 Upload your chat and get detailed insights about conversation patterns, 
-                response times, and relationship dynamics.
+                response times, relationship dynamics, and conflict resolution advice.
               </p>
               
               <div className="flex flex-wrap justify-center gap-4 mt-8">
@@ -64,7 +64,7 @@ const Index = () => {
                 </div>
                 <div className="flex items-center bg-white/70 px-4 py-2 rounded-full shadow-sm">
                   <span className="w-3 h-3 bg-purple-400 rounded-full mr-2"></span>
-                  <span className="text-sm">Communication Patterns</span>
+                  <span className="text-sm">Emotion Analysis</span>
                 </div>
               </div>
             </div>
@@ -82,6 +82,7 @@ const Index = () => {
       
       <footer className="py-6 px-4 text-center text-apple-dark-gray text-sm">
         <p>WhatsApp Chat Analyzer • All data is processed locally on your device</p>
+        <p className="mt-1 text-xs">Uses AI to analyze communication patterns and provide insights</p>
       </footer>
     </div>
   );
