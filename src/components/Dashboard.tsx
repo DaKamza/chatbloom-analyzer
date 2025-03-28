@@ -40,6 +40,11 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
     setPromptIndex((prev) => (prev + 1) % promptTypes.length);
   };
 
+  // Handle upgrade success
+  const handleUpgradeSuccess = () => {
+    setIsPremium(true);
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-10 animate-fade-in">
       <div className="flex justify-between items-center mb-8">
@@ -89,11 +94,14 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
       
       {!isPremium && (
         <div className="mb-6">
-          <UpgradePrompts type={promptTypes[promptIndex]} />
+          <UpgradePrompts 
+            type={promptTypes[promptIndex]} 
+            onUpgradeSuccess={handleUpgradeSuccess}
+          />
         </div>
       )}
       
-      <Tabs defaultValue="conflicts" className="w-full">
+      <Tabs defaultValue="stats" className="w-full">
         <TabsList className="w-full max-w-md mx-auto mb-8 bg-apple-gray/50 p-1 rounded-full">
           <TabsTrigger 
             value="stats" 

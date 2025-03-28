@@ -3,16 +3,25 @@ import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AnalysisCard from './AnalysisCard';
+import PayPalCheckout from './PayPalCheckout';
+import { toast } from '@/hooks/use-toast';
 
 interface UpgradePromptsProps {
   type?: 'basic' | 'pay-per-feature' | 'subscription';
+  onUpgradeSuccess?: () => void;
 }
 
-const UpgradePrompts: React.FC<UpgradePromptsProps> = ({ type = 'basic' }) => {
-  const handleUpgrade = () => {
-    console.log('Upgrade clicked:', type);
-    // Here you would implement the actual upgrade flow
-    alert('This is a demo - in a real app, this would redirect to a payment page');
+const UpgradePrompts: React.FC<UpgradePromptsProps> = ({ 
+  type = 'basic',
+  onUpgradeSuccess
+}) => {
+  const handleUpgradeSuccess = () => {
+    console.log('Payment successful');
+    toast({
+      title: "Upgrade Complete!",
+      description: "Thank you for your purchase. Your premium features are now available.",
+    });
+    if (onUpgradeSuccess) onUpgradeSuccess();
   };
 
   if (type === 'basic') {
@@ -67,12 +76,13 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({ type = 'basic' }) => {
             </ul>
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🔥 Upgrade now & get 50% off for first-time users! 🔥</p>
-              <Button 
+              <PayPalCheckout 
+                amount="9.99" 
+                productName="WhatsApp Analyzer Premium" 
+                onSuccess={handleUpgradeSuccess}
+                buttonText="Upgrade to Premium ($9.99)"
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
-                onClick={handleUpgrade}
-              >
-                <Sparkles className="w-4 h-4 mr-2" /> Upgrade to Premium
-              </Button>
+              />
             </div>
           </div>
         </div>
@@ -110,12 +120,13 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({ type = 'basic' }) => {
           <div className="bg-gradient-to-r from-amber-100 to-orange-100 p-4 rounded-lg mt-4">
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🎁 Limited-time offer: Unlock all for just $4.99!</p>
-              <Button 
+              <PayPalCheckout 
+                amount="4.99" 
+                productName="WhatsApp Analyzer - Advanced Features" 
+                onSuccess={handleUpgradeSuccess}
+                buttonText="Unlock Now ($4.99)"
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
-                onClick={handleUpgrade}
-              >
-                <Zap className="w-4 h-4 mr-2" /> Unlock Now
-              </Button>
+              />
             </div>
           </div>
         </div>
@@ -152,20 +163,22 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({ type = 'basic' }) => {
           <div className="bg-gradient-to-r from-red-100 to-pink-100 p-4 rounded-lg mt-4">
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🎯 Subscribe now for just $2.99/month and get a 7-day free trial!</p>
-              <div className="flex gap-3 justify-center">
-                <Button 
+              <div className="flex gap-3 justify-center flex-wrap">
+                <PayPalCheckout 
+                  amount="0.01" 
+                  productName="WhatsApp Analyzer - Free Trial" 
+                  onSuccess={handleUpgradeSuccess}
+                  buttonText="Start Free Trial"
                   variant="outline"
                   className="border-red-500 text-red-500 hover:bg-red-50"
-                  onClick={() => handleUpgrade()}
-                >
-                  Start Free Trial
-                </Button>
-                <Button 
+                />
+                <PayPalCheckout 
+                  amount="2.99" 
+                  productName="WhatsApp Analyzer - Monthly Subscription" 
+                  onSuccess={handleUpgradeSuccess}
+                  buttonText="Subscribe Now ($2.99/mo)"
                   className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white"
-                  onClick={() => handleUpgrade()}
-                >
-                  <Heart className="w-4 h-4 mr-2" /> Subscribe Now
-                </Button>
+                />
               </div>
             </div>
           </div>
