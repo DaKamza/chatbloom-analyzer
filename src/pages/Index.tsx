@@ -5,7 +5,7 @@ import UploadSection from '@/components/UploadSection';
 import Dashboard from '@/components/Dashboard';
 import { ParsedChat } from '@/utils/chatParser';
 import { analyzeChatData, ChatAnalysis } from '@/utils/analyzeData';
-import { MessageSquare, Sparkles, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Sparkles, AlertTriangle, Zap } from 'lucide-react';
 
 const Index = () => {
   const [parsedChat, setParsedChat] = useState<ParsedChat | null>(null);
@@ -57,14 +57,23 @@ const Index = () => {
                 <div className="flex items-center bg-white/70 px-4 py-2 rounded-full shadow-sm">
                   <span className="w-3 h-3 bg-red-400 rounded-full mr-2"></span>
                   <span className="text-sm">Conflict Detection</span>
+                  <span className="ml-1 text-xs px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded-full">Premium</span>
                 </div>
                 <div className="flex items-center bg-white/70 px-4 py-2 rounded-full shadow-sm">
                   <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
                   <span className="text-sm">AI Relationship Advice</span>
+                  <span className="ml-1 text-xs px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded-full">Premium</span>
                 </div>
                 <div className="flex items-center bg-white/70 px-4 py-2 rounded-full shadow-sm">
                   <span className="w-3 h-3 bg-purple-400 rounded-full mr-2"></span>
                   <span className="text-sm">Emotion Analysis</span>
+                </div>
+              </div>
+              
+              <div className="mt-6 inline-block bg-gradient-to-r from-purple-100 to-blue-100 px-5 py-2 rounded-full">
+                <div className="flex items-center">
+                  <Zap className="h-4 w-4 text-purple-500 mr-2" />
+                  <span className="text-sm text-purple-800">Premium features available with one-time payment or subscription</span>
                 </div>
               </div>
             </div>

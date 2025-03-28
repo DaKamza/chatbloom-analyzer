@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { ChatAnalysis } from '@/utils/analyzeData';
 import { ParsedChat } from '@/utils/chatParser';
 import MessageStats from './MessageStats';
@@ -11,6 +11,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ConflictDetection from './ConflictDetection';
 import RelationshipAdvice from './RelationshipAdvice';
+import UpgradePrompts from './UpgradePrompts';
 import { Sparkles, Smile, AlertTriangle, BarChart } from 'lucide-react';
 import EmojiAnalysis from './EmojiAnalysis';
 
@@ -22,6 +23,22 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) => {
   const hasLimitedData = parsedChat.messages.length < 50;
+  // State to track if the user is on the free plan (in a real app, this would come from a user auth/profile system)
+  const [isPremium, setIsPremium] = useState(false);
+  // Cycle through different upgrade prompts
+  const [promptIndex, setPromptIndex] = useState(0);
+  
+  const promptTypes = ['basic', 'pay-per-feature', 'subscription'] as const;
+  
+  // Simulate toggling premium status for demo purposes
+  const togglePremium = () => {
+    setIsPremium(!isPremium);
+  };
+  
+  // Cycle to the next prompt type
+  const cyclePrompt = () => {
+    setPromptIndex((prev) => (prev + 1) % promptTypes.length);
+  };
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-10 animate-fade-in">
@@ -37,12 +54,27 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           </p>
         </div>
         
-        <button
-          onClick={onReset}
-          className="px-4 py-2 rounded-lg bg-apple-gray hover:bg-apple-gray/80 text-apple-black transition-colors"
-        >
-          Analyze Another Chat
-        </button>
+        <div className="flex gap-2">
+          {/* Demo buttons - would normally be hidden in production */}
+          <button
+            onClick={cyclePrompt}
+            className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+          >
+            Cycle Prompts (Demo)
+          </button>
+          <button
+            onClick={togglePremium}
+            className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+          >
+            {isPremium ? "Switch to Free (Demo)" : "Switch to Premium (Demo)"}
+          </button>
+          <button
+            onClick={onReset}
+            className="px-4 py-2 rounded-lg bg-apple-gray hover:bg-apple-gray/80 text-apple-black transition-colors"
+          >
+            Analyze Another Chat
+          </button>
+        </div>
       </div>
       
       {hasLimitedData && (
@@ -53,6 +85,12 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
             try uploading a chat with more messages.
           </AlertDescription>
         </Alert>
+      )}
+      
+      {!isPremium && (
+        <div className="mb-6">
+          <UpgradePrompts type={promptTypes[promptIndex]} />
+        </div>
       )}
       
       <Tabs defaultValue="conflicts" className="w-full">
@@ -67,6 +105,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           <TabsTrigger 
             value="conflicts" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
+            disabled={!isPremium}
           >
             <AlertTriangle className="w-4 h-4 mr-1" />
             Conflict Analysis
@@ -81,6 +120,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           <TabsTrigger 
             value="advice" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
+            disabled={!isPremium}
           >
             <Sparkles className="w-4 h-4 mr-1" />
             Resolution Advice
@@ -92,7 +132,18 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </TabsContent>
         
         <TabsContent value="conflicts" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          <ConflictDetection analysis={analysis} parsedChat={parsedChat} />
+          {isPremium ? (
+            <ConflictDetection analysis={analysis} parsedChat={parsedChat} />
+          ) : (
+            <div className="text-center py-10">
+              <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto mb-4" />
+              <h3 className="text-xl font-medium mb-2">Premium Feature</h3>
+              <p className="text-apple-dark-gray mb-4 max-w-md mx-auto">
+                Conflict Analysis is a premium feature. Upgrade to access detailed insights about
+                conversation conflicts and tension points.
+              </p>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="emojis" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
@@ -100,7 +151,18 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </TabsContent>
         
         <TabsContent value="advice" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          <RelationshipAdvice analysis={analysis} parsedChat={parsedChat} />
+          {isPremium ? (
+            <RelationshipAdvice analysis={analysis} parsedChat={parsedChat} />
+          ) : (
+            <div className="text-center py-10">
+              <Sparkles className="w-10 h-10 text-purple-500 mx-auto mb-4" />
+              <h3 className="text-xl font-medium mb-2">Premium Feature</h3>
+              <p className="text-apple-dark-gray mb-4 max-w-md mx-auto">
+                AI-powered Resolution Advice is a premium feature. Upgrade to get personalized
+                suggestions for improving your communication.
+              </p>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
