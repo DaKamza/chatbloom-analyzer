@@ -129,7 +129,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       >
         {buttonText}
       </Button>
-      <style jsx>{`
+      <style>{`
         .paypal-fallback-button {
           display: block;
         }

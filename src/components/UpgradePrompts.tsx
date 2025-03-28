@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import AnalysisCard from './AnalysisCard';
 import PayPalCheckout from './PayPalCheckout';
 import { toast } from '@/hooks/use-toast';
+import { PRODUCTS } from '@/config/paypal';
 
 interface UpgradePromptsProps {
   type?: 'basic' | 'pay-per-feature' | 'subscription';
@@ -77,10 +78,10 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🔥 Upgrade now & get 50% off for first-time users! 🔥</p>
               <PayPalCheckout 
-                amount="9.99" 
-                productName="WhatsApp Analyzer Premium" 
+                amount={PRODUCTS.ALL_INCLUSIVE.price} 
+                productName={PRODUCTS.ALL_INCLUSIVE.name} 
                 onSuccess={handleUpgradeSuccess}
-                buttonText="Upgrade to Premium ($9.99)"
+                buttonText={`Upgrade to Premium ($${PRODUCTS.ALL_INCLUSIVE.price})`}
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
               />
             </div>
@@ -119,12 +120,12 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
           
           <div className="bg-gradient-to-r from-amber-100 to-orange-100 p-4 rounded-lg mt-4">
             <div className="text-center">
-              <p className="text-sm font-medium mb-3">🎁 Limited-time offer: Unlock all for just $4.99!</p>
+              <p className="text-sm font-medium mb-3">🎁 Limited-time offer: Unlock all for just ${PRODUCTS.ONE_TIME_FEATURES.price}!</p>
               <PayPalCheckout 
-                amount="4.99" 
-                productName="WhatsApp Analyzer - Advanced Features" 
+                amount={PRODUCTS.ONE_TIME_FEATURES.price} 
+                productName={PRODUCTS.ONE_TIME_FEATURES.name} 
                 onSuccess={handleUpgradeSuccess}
-                buttonText="Unlock Now ($4.99)"
+                buttonText={`Unlock Now ($${PRODUCTS.ONE_TIME_FEATURES.price})`}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
               />
             </div>
@@ -162,7 +163,7 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
           
           <div className="bg-gradient-to-r from-red-100 to-pink-100 p-4 rounded-lg mt-4">
             <div className="text-center">
-              <p className="text-sm font-medium mb-3">🎯 Subscribe now for just $2.99/month and get a 7-day free trial!</p>
+              <p className="text-sm font-medium mb-3">🎯 Subscribe now for just ${PRODUCTS.PREMIUM_MONTHLY.price}/month and get a 7-day free trial!</p>
               <div className="flex gap-3 justify-center flex-wrap">
                 <PayPalCheckout 
                   amount="0.01" 
@@ -173,10 +174,10 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
                   className="border-red-500 text-red-500 hover:bg-red-50"
                 />
                 <PayPalCheckout 
-                  amount="2.99" 
-                  productName="WhatsApp Analyzer - Monthly Subscription" 
+                  amount={PRODUCTS.PREMIUM_MONTHLY.price} 
+                  productName={PRODUCTS.PREMIUM_MONTHLY.name} 
                   onSuccess={handleUpgradeSuccess}
-                  buttonText="Subscribe Now ($2.99/mo)"
+                  buttonText={`Subscribe Now ($${PRODUCTS.PREMIUM_MONTHLY.price}/mo)`}
                   className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white"
                 />
               </div>
