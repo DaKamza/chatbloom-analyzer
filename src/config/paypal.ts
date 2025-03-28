@@ -2,11 +2,11 @@
 // Payment gateway configuration
 // Currently using PayPal, but structured to allow easy switching to other providers
 
-// PayPal provides a 'sb' (sandbox) client ID for testing
-export const PAYPAL_CLIENT_ID = 'sb'; // Replace with your actual PayPal client ID in production
+// PayPal client ID for live payments
+export const PAYPAL_CLIENT_ID = 'AfNum6v6pWBwd88FyJlwWg-XzAW-oau2ibfiMYPXM9f6MzRw7GrFEIRwpMGXW-Daf_HPFBM_eKYCAce0';
 
-// For development (sandbox) mode:
-export const PAYPAL_ENV = 'sandbox'; // Use 'production' for live payments
+// For production mode:
+export const PAYPAL_ENV = 'production'; // Changed from 'sandbox' to 'production'
 
 // Product configurations that can be used with any payment provider
 export const PRODUCTS = {
@@ -32,8 +32,6 @@ export const PRODUCTS = {
   }
 };
 
-// Instructions for switching to production:
-// 1. Create a PayPal Business account at https://www.paypal.com/business
-// 2. Once approved, get your live Client ID from the PayPal Developer Dashboard
-// 3. Replace PAYPAL_CLIENT_ID with your live Client ID
-// 4. Change PAYPAL_ENV to 'production'
+// Your PayPal account is now configured for production payments
+// If you need to make changes to your PayPal setup, visit your PayPal Business account dashboard
+
