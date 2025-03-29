@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ParsedChat } from './chatParser';
 import { ChatAnalysis } from './analyzeData';
 import { toast } from '@/hooks/use-toast';
+import { Json } from '@/integrations/supabase/types';
 
 // Save chat upload to Supabase
 export const saveChatUpload = async (
@@ -16,11 +17,12 @@ export const saveChatUpload = async (
   }
   
   try {
+    // Cast the parsedChat to Json type to satisfy TypeScript
     const { data, error } = await supabase
       .from('chat_uploads')
       .insert({
         user_id: userId,
-        chat_data: parsedChat,
+        chat_data: parsedChat as unknown as Json,
         file_name: fileName
       })
       .select('id')
@@ -59,12 +61,13 @@ export const saveChatAnalysis = async (
   }
   
   try {
+    // Cast the analysis to Json type to satisfy TypeScript
     const { error } = await supabase
       .from('chat_analysis')
       .insert({
         user_id: userId,
         chat_upload_id: chatUploadId,
-        analysis_data: analysis
+        analysis_data: analysis as unknown as Json
       });
       
     if (error) {

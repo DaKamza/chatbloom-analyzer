@@ -1,9 +1,11 @@
+
 import React, { useState, useRef } from 'react';
 import { parseWhatsAppChat } from '@/utils/chatParser';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/context/AuthContext';
 import { saveChatUpload, saveChatAnalysis } from '@/utils/chatStorage';
+import { analyzeChatData } from '@/utils/analyzeData';
 
 interface UploadSectionProps {
   onChatDataParsed: (chatData: ReturnType<typeof parseWhatsAppChat>) => void;
