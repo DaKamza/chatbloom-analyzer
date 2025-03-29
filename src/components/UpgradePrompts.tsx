@@ -59,7 +59,7 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
           
           <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg mt-4">
             <div className="text-center">
-              <Button asChild className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
+              <Button asChild className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white cursor-pointer">
                 <Link to="/auth">Sign In / Create Account</Link>
               </Button>
             </div>

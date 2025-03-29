@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { PAYPAL_CLIENT_ID } from '@/config/paypal';
+import { PAYPAL_CLIENT_ID, PAYPAL_ENV } from '@/config/paypal';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -30,21 +30,24 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   className
 }) => {
   const paypalButtonsRef = useRef<HTMLDivElement>(null);
-  const paypalInitialized = useRef(false);
   const [sdkReady, setSdkReady] = React.useState(false);
+  const [isButtonRendered, setIsButtonRendered] = React.useState(false);
   const { user, isPremium } = useAuth();
 
   // Helper to load PayPal SDK script
   const loadPayPalScript = () => {
     return new Promise<void>((resolve, reject) => {
+      console.log('Loading PayPal SDK with client ID:', PAYPAL_CLIENT_ID);
+      
       // Remove any existing PayPal scripts to avoid conflicts
       const existingScript = document.querySelector('script[data-namespace="paypal-js"]');
       if (existingScript) {
         existingScript.remove();
+        console.log('Removed existing PayPal script');
       }
 
       const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD`;
+      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&currency=USD&disable-funding=credit,card`;
       script.setAttribute('data-namespace', 'paypal-js');
       script.async = true;
       
@@ -114,11 +117,15 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   };
 
   const initializePayPalButtons = () => {
-    if (!window.paypal || !paypalButtonsRef.current) return;
+    if (!window.paypal || !paypalButtonsRef.current) {
+      console.log('PayPal not available or button container not found');
+      return;
+    }
     
     // Clear any existing content
     if (paypalButtonsRef.current) {
       paypalButtonsRef.current.innerHTML = '';
+      console.log('Cleared PayPal button container');
     }
 
     try {
@@ -127,7 +134,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       window.paypal.Buttons({
         style: {
           layout: 'vertical',
-          color: 'blue',
+          color: 'gold',
           shape: 'rect',
           label: 'paypal'
         },
@@ -170,25 +177,30 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
             description: "You've cancelled the payment process. You can try again anytime.",
             variant: "default",
           });
+        },
+        onRender: () => {
+          console.log('PayPal buttons rendered successfully');
+          setIsButtonRendered(true);
         }
       }).render(paypalButtonsRef.current);
       
-      console.log('PayPal buttons rendered successfully');
+      console.log('PayPal render function called');
     } catch (error) {
       console.error('Failed to initialize PayPal buttons:', error);
+      setIsButtonRendered(false);
     }
   };
 
   // Load the PayPal SDK when the component mounts
   useEffect(() => {
     if (!sdkReady) {
-      console.log('Loading PayPal SDK...');
+      console.log('Loading PayPal SDK on component mount...');
       loadPayPalScript()
         .then(() => {
-          console.log('PayPal SDK loaded successfully');
+          console.log('PayPal SDK loaded successfully on component mount');
         })
         .catch(err => {
-          console.error('Failed to load PayPal SDK:', err);
+          console.error('Failed to load PayPal SDK on component mount:', err);
           toast({
             title: "Payment System Error",
             description: "Unable to load payment system. Please try again later.",
@@ -203,6 +215,14 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     if (sdkReady && paypalButtonsRef.current) {
       console.log('SDK is ready, initializing PayPal buttons');
       initializePayPalButtons();
+      
+      // Set a timeout to check if buttons were rendered
+      setTimeout(() => {
+        if (paypalButtonsRef.current && paypalButtonsRef.current.children.length === 0) {
+          console.log('No PayPal buttons rendered after timeout, forcing re-render');
+          initializePayPalButtons();
+        }
+      }, 1000);
     }
   }, [sdkReady, amount]);
 
@@ -218,13 +238,32 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   return (
     <div className="paypal-button-container">
       {/* PayPal buttons will render here */}
-      <div ref={paypalButtonsRef} className="paypal-buttons mb-2" data-amount={amount}></div>
+      <div 
+        ref={paypalButtonsRef} 
+        className="paypal-buttons mb-3 min-h-[40px] flex items-center justify-center" 
+        data-amount={amount}
+      >
+        {sdkReady && !isButtonRendered && (
+          <div className="text-center text-sm text-gray-500">
+            Loading PayPal...
+          </div>
+        )}
+      </div>
       
-      {/* Fallback button - always visible but with conditional styling */}
+      {/* Always show the fallback button */}
       <Button 
         variant={variant} 
-        className={`${className} w-full`}
+        className={`${className} w-full cursor-pointer`}
         onClick={() => {
+          if (!user) {
+            toast({
+              title: "Authentication Required",
+              description: "Please log in to purchase premium features.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           if (!sdkReady) {
             // If SDK is not ready, try loading it again
             loadPayPalScript();
@@ -237,10 +276,16 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
             // If SDK is ready but buttons aren't shown, reinitialize
             initializePayPalButtons();
             toast({
-              title: "Payment Options",
-              description: "Please use the PayPal button to complete your purchase.",
+              title: "Opening PayPal",
+              description: "Redirecting to PayPal for secure payment...",
               variant: "default",
             });
+            
+            // Attempt to open PayPal in a popup if buttons don't render
+            if (!isButtonRendered) {
+              const checkoutUrl = `https://www.paypal.com/checkoutnow?token=EC-${productName.replace(/\s+/g, '')}-${Date.now()}`;
+              window.open(checkoutUrl, '_blank');
+            }
           }
         }}
       >

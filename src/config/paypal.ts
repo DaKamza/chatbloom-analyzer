@@ -34,4 +34,3 @@ export const PRODUCTS = {
 
 // Your PayPal account is now configured for production payments
 // If you need to make changes to your PayPal setup, visit your PayPal Business account dashboard
-
