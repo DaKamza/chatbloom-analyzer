@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -209,7 +208,7 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
           <div className="bg-gradient-to-r from-red-100 to-pink-100 p-4 rounded-lg mt-4">
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🎯 Subscribe now for just ${PRODUCTS.PREMIUM_MONTHLY.price}/month and get a 7-day free trial!</p>
-              <div className="flex gap-3 justify-center flex-wrap">
+              <div className="space-y-3">
                 <PayPalCheckout 
                   amount="0.01" 
                   productName="WhatsApp Analyzer - Free Trial" 

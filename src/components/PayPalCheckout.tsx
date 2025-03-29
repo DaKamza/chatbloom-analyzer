@@ -215,50 +215,37 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     );
   }
 
-  // Fallback button for when PayPal doesn't load
-  const handleFallbackClick = () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to purchase premium features.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    console.log('Fallback button clicked, attempting to reload PayPal SDK');
-    toast({
-      title: "Payment System Loading",
-      description: "Please wait a moment and try again...",
-      variant: "default",
-    });
-    
-    // Attempt to reload the SDK
-    loadPayPalScript().then(() => {
-      // SDK will be reinitialized via the sdkReady useEffect
-    });
-  };
-
   return (
     <div className="paypal-button-container">
-      <div ref={paypalButtonsRef} className="paypal-buttons" data-amount={amount}></div>
-      {!sdkReady && (
-        <Button 
-          variant={variant} 
-          className={`${className} paypal-fallback-button`}
-          onClick={handleFallbackClick}
-        >
-          {buttonText}
-        </Button>
-      )}
-      <style>{`
-        .paypal-fallback-button {
-          display: block;
-        }
-        .paypal-buttons:not(:empty) + .paypal-fallback-button {
-          display: none;
-        }
-      `}</style>
+      {/* PayPal buttons will render here */}
+      <div ref={paypalButtonsRef} className="paypal-buttons mb-2" data-amount={amount}></div>
+      
+      {/* Fallback button - always visible but with conditional styling */}
+      <Button 
+        variant={variant} 
+        className={`${className} w-full`}
+        onClick={() => {
+          if (!sdkReady) {
+            // If SDK is not ready, try loading it again
+            loadPayPalScript();
+            toast({
+              title: "Payment System Loading",
+              description: "Please wait a moment while we connect to PayPal...",
+              variant: "default",
+            });
+          } else {
+            // If SDK is ready but buttons aren't shown, reinitialize
+            initializePayPalButtons();
+            toast({
+              title: "Payment Options",
+              description: "Please use the PayPal button to complete your purchase.",
+              variant: "default",
+            });
+          }
+        }}
+      >
+        {buttonText}
+      </Button>
     </div>
   );
 };

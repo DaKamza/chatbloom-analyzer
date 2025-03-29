@@ -68,13 +68,13 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           {/* Demo button to cycle prompts */}
           <button
             onClick={cyclePrompt}
-            className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
+            className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors cursor-pointer"
           >
             Cycle Prompts
           </button>
           <button
             onClick={onReset}
-            className="px-4 py-2 rounded-lg bg-apple-gray hover:bg-apple-gray/80 text-apple-black transition-colors"
+            className="px-4 py-2 rounded-lg bg-apple-gray hover:bg-apple-gray/80 text-apple-black transition-colors cursor-pointer"
           >
             Analyze Another Chat
           </button>
