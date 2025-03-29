@@ -1,8 +1,9 @@
-
 import React, { useState, useRef } from 'react';
 import { parseWhatsAppChat } from '@/utils/chatParser';
 import { toast } from '@/components/ui/use-toast';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
+import { useAuth } from '@/context/AuthContext';
+import { saveChatUpload, saveChatAnalysis } from '@/utils/chatStorage';
 
 interface UploadSectionProps {
   onChatDataParsed: (chatData: ReturnType<typeof parseWhatsAppChat>) => void;
@@ -14,6 +15,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
   const [error, setError] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -91,6 +93,40 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = event.target.files?.[0];
+    if (!selectedFile) return;
+
+    const reader = new FileReader();
+    reader.readAsText(selectedFile);
+
+    reader.onload = async (e) => {
+      try {
+        const fileName = selectedFile.name || 'WhatsApp Chat';
+        const parsedChatData = parseWhatsAppChat(e.target?.result as string);
+        
+        // Save to Supabase if user is logged in
+        if (user) {
+          const uploadId = await saveChatUpload(parsedChatData, fileName, user.id);
+          if (uploadId) {
+            const analysis = analyzeChatData(parsedChatData);
+            await saveChatAnalysis(analysis, uploadId, user.id);
+          }
+        }
+        
+        onChatDataParsed(parsedChatData);
+      } catch (error) {
+        console.error("Error processing file:", error);
+        setError("Something went wrong while processing the chat file.");
+        toast({
+          title: "Error processing file",
+          description: "Something went wrong while processing the chat file.",
+          variant: "destructive",
+        });
+      }
+    };
+  };
+
   const handleClick = () => {
     fileInputRef.current?.click();
   };
@@ -111,7 +147,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
           type="file"
           accept=".txt"
           className="hidden"
-          onChange={handleFileChange}
+          onChange={handleFileUpload}
           disabled={isLoading}
         />
         
@@ -146,7 +182,7 @@ const UploadSection: React.FC<UploadSectionProps> = ({ onChatDataParsed }) => {
           <p className="text-apple-dark-gray text-center max-w-md mb-2">
             Drag and drop your exported WhatsApp chat file (.txt) here, or click to browse
           </p>
-          <p className="text-xs text-apple-dark-gray/70 text-center max-w-md">
+          <p className="text-apple-dark-gray/70 text-center max-w-md">
             All analysis happens locally on your device. Your data never leaves your browser.
           </p>
           

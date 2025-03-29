@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { PAYPAL_CLIENT_ID, PAYPAL_ENV } from '@/config/paypal';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PayPalCheckoutProps {
   amount: string;
@@ -30,6 +32,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   const paypalButtonsRef = useRef<HTMLDivElement>(null);
   const paypalInitialized = useRef(false);
   const [sdkReady, setSdkReady] = React.useState(false);
+  const { user, isPremium } = useAuth();
 
   // Helper to load PayPal SDK script
   const loadPayPalScript = () => {
@@ -57,6 +60,54 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       
       document.body.appendChild(script);
     });
+  };
+
+  const processPayment = async (orderData: any) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase premium features.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    try {
+      // Call our edge function to verify and process the payment
+      const { data, error } = await supabase.functions.invoke("verify-payment", {
+        body: {
+          transaction_id: orderData.id,
+          product_name: productName,
+          amount: amount,
+          user_id: user.id
+        }
+      });
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      console.log("Payment verification response:", data);
+      
+      if (data.success) {
+        toast({
+          title: "Payment Successful!",
+          description: `Your premium features (${data.features.join(", ")}) have been unlocked.`,
+          variant: "default",
+        });
+        
+        if (onSuccess) onSuccess();
+      } else {
+        throw new Error(data.error || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      toast({
+        title: "Payment Processing Error",
+        description: error.message || "There was an issue activating your premium features.",
+        variant: "destructive",
+      });
+    }
   };
 
   const initializePayPalButtons = () => {
@@ -95,12 +146,9 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         onApprove: async (_data: any, actions: any) => {
           const order = await actions.order.capture();
           console.log('Payment successful:', order);
-          toast({
-            title: "Payment Successful!",
-            description: "Your premium features have been unlocked.",
-            variant: "default",
-          });
-          if (onSuccess) onSuccess();
+          
+          // Process the payment in our backend
+          await processPayment(order);
         },
         onError: (err: any) => {
           console.error('PayPal error:', err);
@@ -153,8 +201,26 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     }
   }, [sdkReady]);
 
+  // If user is already premium, show a different message
+  if (isPremium) {
+    return (
+      <div className="text-center py-2">
+        <p className="text-green-600 font-medium">✓ You already have premium access</p>
+      </div>
+    );
+  }
+
   // Fallback button for when PayPal doesn't load
   const handleFallbackClick = () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to purchase premium features.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     toast({
       title: "Payment System Loading",
       description: "Please wait a moment and try again...",

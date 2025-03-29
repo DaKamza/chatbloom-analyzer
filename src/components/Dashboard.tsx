@@ -14,6 +14,7 @@ import RelationshipAdvice from './RelationshipAdvice';
 import UpgradePrompts from './UpgradePrompts';
 import { Sparkles, Smile, AlertTriangle, BarChart } from 'lucide-react';
 import EmojiAnalysis from './EmojiAnalysis';
+import { useAuth } from '@/context/AuthContext';
 
 interface DashboardProps {
   analysis: ChatAnalysis;
@@ -23,17 +24,12 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) => {
   const hasLimitedData = parsedChat.messages.length < 50;
-  // State to track if the user is on the free plan (in a real app, this would come from a user auth/profile system)
-  const [isPremium, setIsPremium] = useState(false);
+  // Use auth context for premium status
+  const { isPremium, checkFeatureAccess } = useAuth();
   // Cycle through different upgrade prompts
   const [promptIndex, setPromptIndex] = useState(0);
   
   const promptTypes = ['basic', 'pay-per-feature', 'subscription'] as const;
-  
-  // Simulate toggling premium status for demo purposes
-  const togglePremium = () => {
-    setIsPremium(!isPremium);
-  };
   
   // Cycle to the next prompt type
   const cyclePrompt = () => {
@@ -42,7 +38,8 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
 
   // Handle upgrade success
   const handleUpgradeSuccess = () => {
-    setIsPremium(true);
+    // No need to manually set premium status as it's managed by our AuthContext
+    // after the payment is processed
   };
 
   return (
@@ -60,18 +57,12 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </div>
         
         <div className="flex gap-2">
-          {/* Demo buttons - would normally be hidden in production */}
+          {/* Demo button to cycle prompts */}
           <button
             onClick={cyclePrompt}
             className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
           >
-            Cycle Prompts (Demo)
-          </button>
-          <button
-            onClick={togglePremium}
-            className="px-4 py-1 text-xs rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition-colors"
-          >
-            {isPremium ? "Switch to Free (Demo)" : "Switch to Premium (Demo)"}
+            Cycle Prompts
           </button>
           <button
             onClick={onReset}
@@ -113,7 +104,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           <TabsTrigger 
             value="conflicts" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
-            disabled={!isPremium}
+            disabled={!isPremium || !checkFeatureAccess('conflict_analysis')}
           >
             <AlertTriangle className="w-4 h-4 mr-1" />
             Conflict Analysis
@@ -128,7 +119,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
           <TabsTrigger 
             value="advice" 
             className="rounded-full text-sm py-2 data-[state=active]:bg-white data-[state=active]:shadow-apple-card"
-            disabled={!isPremium}
+            disabled={!isPremium || !checkFeatureAccess('relationship_advice')}
           >
             <Sparkles className="w-4 h-4 mr-1" />
             Resolution Advice
@@ -140,7 +131,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </TabsContent>
         
         <TabsContent value="conflicts" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          {isPremium ? (
+          {isPremium && checkFeatureAccess('conflict_analysis') ? (
             <ConflictDetection analysis={analysis} parsedChat={parsedChat} />
           ) : (
             <div className="text-center py-10">
@@ -159,7 +150,7 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
         </TabsContent>
         
         <TabsContent value="advice" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          {isPremium ? (
+          {isPremium && checkFeatureAccess('relationship_advice') ? (
             <RelationshipAdvice analysis={analysis} parsedChat={parsedChat} />
           ) : (
             <div className="text-center py-10">

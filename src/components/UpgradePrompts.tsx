@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,8 @@ import AnalysisCard from './AnalysisCard';
 import PayPalCheckout from './PayPalCheckout';
 import { toast } from '@/hooks/use-toast';
 import { PRODUCTS } from '@/config/paypal';
+import { useAuth } from '@/context/AuthContext';
+import { Link } from 'react-router-dom';
 
 interface UpgradePromptsProps {
   type?: 'basic' | 'pay-per-feature' | 'subscription';
@@ -16,14 +17,57 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
   type = 'basic',
   onUpgradeSuccess
 }) => {
+  const { user, isPremium } = useAuth();
+  
   const handleUpgradeSuccess = () => {
     console.log('Payment successful');
     toast({
       title: "Upgrade Complete!",
       description: "Thank you for your purchase. Your premium features are now available.",
     });
+    
     if (onUpgradeSuccess) onUpgradeSuccess();
   };
+
+  if (isPremium) {
+    return (
+      <AnalysisCard title="Premium Features Active" gradient>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-medium text-apple-black">Thank you for being a premium user! 🎉</h3>
+              <p className="text-apple-dark-gray">You have access to all premium features.</p>
+            </div>
+          </div>
+        </div>
+      </AnalysisCard>
+    );
+  }
+
+  if (!user) {
+    return (
+      <AnalysisCard title="Sign In to Unlock Premium Features" gradient>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-1" />
+            <div>
+              <h3 className="text-lg font-medium text-apple-black">Sign in to unlock premium features!</h3>
+              <p className="text-apple-dark-gray">Create an account or sign in to access advanced analysis tools.</p>
+            </div>
+          </div>
+          
+          <div className="bg-gradient-to-r from-purple-100 to-blue-100 p-4 rounded-lg mt-4">
+            <div className="text-center">
+              <Button asChild className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
+                <Link to="/auth">Sign In / Create Account</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AnalysisCard>
+    );
+  }
 
   if (type === 'basic') {
     return (
