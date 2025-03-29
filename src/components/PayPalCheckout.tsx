@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { PAYPAL_CLIENT_ID, PAYPAL_ENV } from '@/config/paypal';
+import { PAYPAL_CLIENT_ID } from '@/config/paypal';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -49,6 +49,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       script.async = true;
       
       script.onload = () => {
+        console.log('PayPal SDK loaded successfully');
         setSdkReady(true);
         resolve();
       };
@@ -73,6 +74,8 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     }
     
     try {
+      console.log("Processing payment with order data:", orderData);
+      
       // Call our edge function to verify and process the payment
       const { data, error } = await supabase.functions.invoke("verify-payment", {
         body: {
@@ -111,15 +114,15 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   };
 
   const initializePayPalButtons = () => {
-    if (!window.paypal || !paypalButtonsRef.current || paypalInitialized.current) return;
+    if (!window.paypal || !paypalButtonsRef.current) return;
+    
+    // Clear any existing content
+    if (paypalButtonsRef.current) {
+      paypalButtonsRef.current.innerHTML = '';
+    }
 
     try {
-      // Clear any existing content
-      if (paypalButtonsRef.current) {
-        paypalButtonsRef.current.innerHTML = '';
-      }
-
-      paypalInitialized.current = true;
+      console.log('Initializing PayPal buttons with amount:', amount);
       
       window.paypal.Buttons({
         style: {
@@ -129,6 +132,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
           label: 'paypal'
         },
         createOrder: (_data: any, actions: any) => {
+          console.log('Creating PayPal order for amount:', amount);
           return actions.order.create({
             purchase_units: [
               {
@@ -144,6 +148,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
           });
         },
         onApprove: async (_data: any, actions: any) => {
+          console.log('Payment approved, capturing order...');
           const order = await actions.order.capture();
           console.log('Payment successful:', order);
           
@@ -159,6 +164,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
           });
         },
         onCancel: () => {
+          console.log('Payment cancelled by user');
           toast({
             title: "Payment Cancelled",
             description: "You've cancelled the payment process. You can try again anytime.",
@@ -166,40 +172,39 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
           });
         }
       }).render(paypalButtonsRef.current);
+      
+      console.log('PayPal buttons rendered successfully');
     } catch (error) {
       console.error('Failed to initialize PayPal buttons:', error);
-      paypalInitialized.current = false;
     }
   };
 
+  // Load the PayPal SDK when the component mounts
   useEffect(() => {
-    // Load the PayPal SDK when the component mounts
-    loadPayPalScript()
-      .then(() => {
-        console.log('PayPal SDK loaded successfully');
-        // The SDK is now loaded, will be initialized in the next useEffect
-      })
-      .catch(err => {
-        console.error('Failed to load PayPal SDK:', err);
-        toast({
-          title: "Payment System Error",
-          description: "Unable to load payment system. Please try again later.",
-          variant: "destructive",
+    if (!sdkReady) {
+      console.log('Loading PayPal SDK...');
+      loadPayPalScript()
+        .then(() => {
+          console.log('PayPal SDK loaded successfully');
+        })
+        .catch(err => {
+          console.error('Failed to load PayPal SDK:', err);
+          toast({
+            title: "Payment System Error",
+            description: "Unable to load payment system. Please try again later.",
+            variant: "destructive",
+          });
         });
-      });
-
-    // Cleanup function
-    return () => {
-      paypalInitialized.current = false;
-    };
+    }
   }, []);
 
   // Initialize buttons when SDK is ready
   useEffect(() => {
     if (sdkReady && paypalButtonsRef.current) {
+      console.log('SDK is ready, initializing PayPal buttons');
       initializePayPalButtons();
     }
-  }, [sdkReady]);
+  }, [sdkReady, amount]);
 
   // If user is already premium, show a different message
   if (isPremium) {
@@ -221,6 +226,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       return;
     }
     
+    console.log('Fallback button clicked, attempting to reload PayPal SDK');
     toast({
       title: "Payment System Loading",
       description: "Please wait a moment and try again...",
@@ -235,7 +241,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
 
   return (
     <div className="paypal-button-container">
-      <div ref={paypalButtonsRef} className="paypal-buttons"></div>
+      <div ref={paypalButtonsRef} className="paypal-buttons" data-amount={amount}></div>
       {!sdkReady && (
         <Button 
           variant={variant} 

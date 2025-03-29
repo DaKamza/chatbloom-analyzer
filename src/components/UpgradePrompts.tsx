@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
   const { user, isPremium } = useAuth();
   
   const handleUpgradeSuccess = () => {
-    console.log('Payment successful');
+    console.log('Payment successful, handling upgrade');
     toast({
       title: "Upgrade Complete!",
       description: "Thank you for your purchase. Your premium features are now available.",

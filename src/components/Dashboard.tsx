@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChatAnalysis } from '@/utils/analyzeData';
 import { ParsedChat } from '@/utils/chatParser';
 import MessageStats from './MessageStats';
@@ -33,14 +33,22 @@ const Dashboard: React.FC<DashboardProps> = ({ analysis, parsedChat, onReset }) 
   
   // Cycle to the next prompt type
   const cyclePrompt = () => {
-    setPromptIndex((prev) => (prev + 1) % promptTypes.length);
+    const nextIndex = (promptIndex + 1) % promptTypes.length;
+    console.log(`Cycling prompt from ${promptTypes[promptIndex]} to ${promptTypes[nextIndex]}`);
+    setPromptIndex(nextIndex);
   };
 
   // Handle upgrade success
   const handleUpgradeSuccess = () => {
+    console.log('Upgrade success called in Dashboard');
     // No need to manually set premium status as it's managed by our AuthContext
     // after the payment is processed
   };
+  
+  // Log whenever we change prompt type
+  useEffect(() => {
+    console.log(`Current prompt type: ${promptTypes[promptIndex]}`);
+  }, [promptIndex]);
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 pb-10 animate-fade-in">
