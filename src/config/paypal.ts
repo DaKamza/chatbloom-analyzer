@@ -14,25 +14,29 @@ export const PRODUCTS = {
     name: 'WhatsApp Analyzer Premium Monthly',
     price: '2.99',
     id: 'premium-monthly',
-    hostedButtonId: 'FAHVBVJHL353S'
+    hostedButtonId: 'FAHVBVJHL353S',
+    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FAHVBVJHL353S'
   },
   PREMIUM_YEARLY: {
     name: 'WhatsApp Analyzer Premium Yearly',
     price: '29.99',
     id: 'premium-yearly',
-    hostedButtonId: ''
+    hostedButtonId: '',
+    directPaymentUrl: ''
   },
   ONE_TIME_FEATURES: {
     name: 'WhatsApp Analyzer Premium Features',
     price: '4.99',
     id: 'one-time-features',
-    hostedButtonId: 'XGKN4MK8K88GG'
+    hostedButtonId: 'XGKN4MK8K88GG',
+    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XGKN4MK8K88GG'
   },
   ALL_INCLUSIVE: {
     name: 'WhatsApp Analyzer All Features',
     price: '9.99',
     id: 'all-inclusive',
-    hostedButtonId: 'PWKBHRC3QSM8N'
+    hostedButtonId: 'PWKBHRC3QSM8N',
+    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PWKBHRC3QSM8N'
   }
 };
 

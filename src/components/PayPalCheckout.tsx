@@ -10,6 +10,7 @@ interface PayPalCheckoutProps {
   amount: string;
   productName: string;
   hostedButtonId: string;
+  directPaymentUrl?: string;
   onSuccess?: () => void;
   buttonText?: string;
   variant?: 'default' | 'outline' | 'secondary' | 'destructive' | 'ghost' | 'link';
@@ -26,6 +27,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   amount,
   productName,
   hostedButtonId,
+  directPaymentUrl,
   onSuccess,
   buttonText = "Pay with PayPal",
   variant = "default",
@@ -34,8 +36,10 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   const paypalButtonsRef = useRef<HTMLDivElement>(null);
   const [sdkReady, setSdkReady] = React.useState(false);
   const [isButtonRendered, setIsButtonRendered] = React.useState(false);
+  const [hasAttemptedRender, setHasAttemptedRender] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
   const { user, isPremium } = useAuth();
-  const paypalContainerId = `paypal-container-${hostedButtonId}`;
+  const paypalContainerId = `paypal-container-${hostedButtonId || 'direct'}`;
 
   // Helper to load PayPal SDK script with hosted buttons component
   const loadPayPalScript = () => {
@@ -49,31 +53,41 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         console.log('Removed existing PayPal script');
       }
 
-      const script = document.createElement('script');
-      script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&components=hosted-buttons&disable-funding=venmo&currency=USD`;
-      script.setAttribute('data-namespace', 'paypal-js');
-      script.async = true;
-      
-      script.onload = () => {
-        console.log('PayPal SDK loaded successfully');
-        setSdkReady(true);
-        resolve();
-      };
-      
-      script.onerror = (err) => {
-        console.error('PayPal SDK could not be loaded', err);
-        reject(err);
-      };
-      
-      document.body.appendChild(script);
+      try {
+        const script = document.createElement('script');
+        script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&components=hosted-buttons&disable-funding=venmo&currency=USD`;
+        script.setAttribute('data-namespace', 'paypal-js');
+        script.async = true;
+        
+        script.onload = () => {
+          console.log('PayPal SDK loaded successfully');
+          setSdkReady(true);
+          resolve();
+        };
+        
+        script.onerror = (err) => {
+          console.error('PayPal SDK could not be loaded', err);
+          reject(err);
+        };
+        
+        document.body.appendChild(script);
+      } catch (error) {
+        console.error('Error loading PayPal script:', error);
+        reject(error);
+      }
     });
   };
 
   // Render the hosted button
   const renderHostedButton = () => {
-    if (!window.paypal || !paypalButtonsRef.current || !hostedButtonId) {
-      console.log('PayPal not available or button container not found, or no hosted button ID provided');
-      return;
+    if (!window.paypal || !paypalButtonsRef.current) {
+      console.log('PayPal not available or button container not found');
+      return false;
+    }
+    
+    if (!hostedButtonId) {
+      console.log('No hosted button ID provided');
+      return false;
     }
     
     // Clear any existing content
@@ -93,11 +107,14 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         }).render(`#${paypalContainerId}`);
         setIsButtonRendered(true);
         console.log('Hosted button rendered successfully');
+        return true;
       } catch (error) {
         console.error('Failed to render hosted button:', error);
         setIsButtonRendered(false);
+        return false;
       }
     }
+    return false;
   };
 
   const processPayment = async (orderId: string) => {
@@ -111,6 +128,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     }
     
     try {
+      setIsLoading(true);
       console.log("Processing payment with order ID:", orderId);
       
       // Call our edge function to verify and process the payment
@@ -147,12 +165,14 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         description: error.message || "There was an issue activating your premium features.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   // Load the PayPal SDK when the component mounts
   useEffect(() => {
-    if (!sdkReady && hostedButtonId) {
+    if (!sdkReady) {
       console.log('Loading PayPal SDK on component mount...');
       loadPayPalScript()
         .then(() => {
@@ -167,23 +187,26 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
           });
         });
     }
-  }, [hostedButtonId]);
+  }, []);
 
   // Initialize buttons when SDK is ready
   useEffect(() => {
-    if (sdkReady && paypalButtonsRef.current && hostedButtonId) {
+    if (sdkReady && paypalButtonsRef.current && !hasAttemptedRender) {
       console.log('SDK is ready, rendering hosted button');
-      renderHostedButton();
+      setHasAttemptedRender(true);
+      const renderSuccess = renderHostedButton();
       
       // Set a timeout to check if button was rendered
-      setTimeout(() => {
-        if (paypalButtonsRef.current && paypalButtonsRef.current.children.length === 0) {
-          console.log('No PayPal button rendered after timeout, trying again');
-          renderHostedButton();
-        }
-      }, 1000);
+      if (!renderSuccess) {
+        setTimeout(() => {
+          if (paypalButtonsRef.current && paypalButtonsRef.current.children.length === 0) {
+            console.log('No PayPal button rendered after timeout');
+            setIsButtonRendered(false);
+          }
+        }, 1000);
+      }
     }
-  }, [sdkReady, hostedButtonId]);
+  }, [sdkReady, hostedButtonId, hasAttemptedRender]);
 
   // Handle direct click via fallback button
   const handleDirectPayPalClick = () => {
@@ -196,7 +219,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
       return;
     }
     
-    if (!hostedButtonId) {
+    if (!hostedButtonId && !directPaymentUrl) {
       toast({
         title: "Payment Option Unavailable",
         description: "This payment option is currently unavailable. Please try another option.",
@@ -206,7 +229,7 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     }
     
     // Open PayPal in a new window/tab
-    const paypalUrl = `https://www.paypal.com/webapps/hermes?token=${hostedButtonId}&useraction=commit&mfid=1680289753873_66ae41178c77c`;
+    const paypalUrl = directPaymentUrl || `https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=${hostedButtonId}`;
     window.open(paypalUrl, '_blank');
     
     toast({
@@ -234,9 +257,9 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         data-amount={amount}
         data-hosted-button-id={hostedButtonId}
       >
-        {sdkReady && !isButtonRendered && (
+        {sdkReady && hasAttemptedRender && !isButtonRendered && (
           <div className="text-center text-sm text-gray-500">
-            Loading PayPal...
+            Using default checkout option
           </div>
         )}
       </div>
@@ -246,8 +269,9 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
         variant={variant} 
         className={`${className} w-full cursor-pointer`}
         onClick={handleDirectPayPalClick}
+        disabled={isLoading}
       >
-        {buttonText}
+        {isLoading ? "Processing..." : buttonText}
       </Button>
     </div>
   );
