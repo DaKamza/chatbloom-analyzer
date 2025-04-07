@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -125,7 +124,6 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
               <PayPalCheckout 
                 amount={PRODUCTS.ALL_INCLUSIVE.price} 
                 productName={PRODUCTS.ALL_INCLUSIVE.name}
-                hostedButtonId={PRODUCTS.ALL_INCLUSIVE.hostedButtonId}
                 directPaymentUrl={PRODUCTS.ALL_INCLUSIVE.directPaymentUrl}
                 onSuccess={handleUpgradeSuccess}
                 buttonText={`Upgrade to Premium ($${PRODUCTS.ALL_INCLUSIVE.price})`}
@@ -171,7 +169,6 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
               <PayPalCheckout 
                 amount={PRODUCTS.ONE_TIME_FEATURES.price} 
                 productName={PRODUCTS.ONE_TIME_FEATURES.name}
-                hostedButtonId={PRODUCTS.ONE_TIME_FEATURES.hostedButtonId}
                 directPaymentUrl={PRODUCTS.ONE_TIME_FEATURES.directPaymentUrl}
                 onSuccess={handleUpgradeSuccess}
                 buttonText={`Unlock Now ($${PRODUCTS.ONE_TIME_FEATURES.price})`}
@@ -214,22 +211,9 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
             <div className="text-center">
               <p className="text-sm font-medium mb-3">🎯 Subscribe now for just ${PRODUCTS.PREMIUM_MONTHLY.price}/month and get a 7-day free trial!</p>
               <div className="space-y-3">
-                <Button
-                  variant="outline"
-                  className="border-red-500 text-red-500 hover:bg-red-50 w-full cursor-pointer"
-                  onClick={() => {
-                    toast({
-                      title: "Free Trial Coming Soon",
-                      description: "Our free trial option will be available shortly. Please check back soon!",
-                    });
-                  }}
-                >
-                  Start Free Trial (Coming Soon)
-                </Button>
                 <PayPalCheckout 
                   amount={PRODUCTS.PREMIUM_MONTHLY.price} 
                   productName={PRODUCTS.PREMIUM_MONTHLY.name}
-                  hostedButtonId={PRODUCTS.PREMIUM_MONTHLY.hostedButtonId}
                   directPaymentUrl={PRODUCTS.PREMIUM_MONTHLY.directPaymentUrl}
                   onSuccess={handleUpgradeSuccess}
                   buttonText={`Subscribe Now ($${PRODUCTS.PREMIUM_MONTHLY.price}/mo)`}

@@ -2,11 +2,11 @@
 // Payment gateway configuration
 // Currently using PayPal with hosted buttons
 
-// PayPal client ID for live payments
-export const PAYPAL_CLIENT_ID = 'BAArDLyFaV3LoVN9n_Shk33VHan0ua9i_d90Mtj0zlTtjQTYCTVxjogcsAunbKv6mKV1swfLfP4uLJ2mxU';
+// PayPal client ID for sandbox environment (for testing)
+export const PAYPAL_CLIENT_ID = 'AYFGfKUlOIENKXCbrS9iX7Pl4cJM9wYWHhbvAQXxczaXGiXndPaUJsGbeNiy6xVCfbDRT8nGtEOUsABZ';
 
-// For production mode:
-export const PAYPAL_ENV = 'production';
+// For testing mode:
+export const PAYPAL_ENV = 'sandbox';
 
 // Product configurations that can be used with any payment provider
 export const PRODUCTS = {
@@ -15,30 +15,33 @@ export const PRODUCTS = {
     price: '2.99',
     id: 'premium-monthly',
     hostedButtonId: 'FAHVBVJHL353S',
-    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=FAHVBVJHL353S'
+    // Direct payment links to standard PayPal checkout
+    directPaymentUrl: 'https://www.paypal.com/paypalme/yourusername/2.99'
   },
   PREMIUM_YEARLY: {
     name: 'WhatsApp Analyzer Premium Yearly',
     price: '29.99',
     id: 'premium-yearly',
     hostedButtonId: '',
-    directPaymentUrl: ''
+    directPaymentUrl: 'https://www.paypal.com/paypalme/yourusername/29.99'
   },
   ONE_TIME_FEATURES: {
     name: 'WhatsApp Analyzer Premium Features',
     price: '4.99',
     id: 'one-time-features',
     hostedButtonId: 'XGKN4MK8K88GG',
-    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=XGKN4MK8K88GG'
+    directPaymentUrl: 'https://www.paypal.com/paypalme/yourusername/4.99'
   },
   ALL_INCLUSIVE: {
     name: 'WhatsApp Analyzer All Features',
     price: '9.99',
     id: 'all-inclusive',
     hostedButtonId: 'PWKBHRC3QSM8N',
-    directPaymentUrl: 'https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=PWKBHRC3QSM8N'
+    directPaymentUrl: 'https://www.paypal.com/paypalme/yourusername/9.99'
   }
 };
 
-// Your PayPal account is now configured for production payments with hosted buttons
-// If you need to make changes to your PayPal setup, visit your PayPal Business account dashboard
+// Notes on PayPal integration:
+// 1. Currently using sandbox mode for testing - switch to 'production' when ready
+// 2. Replace 'yourusername' in directPaymentUrl with your actual PayPal.me username
+// 3. For more advanced checkout, consider implementing PayPal Checkout SDK directly
