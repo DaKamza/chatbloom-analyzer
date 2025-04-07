@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Sparkles, Zap, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -123,7 +124,8 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
               <p className="text-sm font-medium mb-3">🔥 Upgrade now & get 50% off for first-time users! 🔥</p>
               <PayPalCheckout 
                 amount={PRODUCTS.ALL_INCLUSIVE.price} 
-                productName={PRODUCTS.ALL_INCLUSIVE.name} 
+                productName={PRODUCTS.ALL_INCLUSIVE.name}
+                hostedButtonId={PRODUCTS.ALL_INCLUSIVE.hostedButtonId}
                 onSuccess={handleUpgradeSuccess}
                 buttonText={`Upgrade to Premium ($${PRODUCTS.ALL_INCLUSIVE.price})`}
                 className="bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white"
@@ -167,7 +169,8 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
               <p className="text-sm font-medium mb-3">🎁 Limited-time offer: Unlock all for just ${PRODUCTS.ONE_TIME_FEATURES.price}!</p>
               <PayPalCheckout 
                 amount={PRODUCTS.ONE_TIME_FEATURES.price} 
-                productName={PRODUCTS.ONE_TIME_FEATURES.name} 
+                productName={PRODUCTS.ONE_TIME_FEATURES.name}
+                hostedButtonId={PRODUCTS.ONE_TIME_FEATURES.hostedButtonId}
                 onSuccess={handleUpgradeSuccess}
                 buttonText={`Unlock Now ($${PRODUCTS.ONE_TIME_FEATURES.price})`}
                 className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
@@ -212,6 +215,7 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
                 <PayPalCheckout 
                   amount="0.01" 
                   productName="WhatsApp Analyzer - Free Trial" 
+                  hostedButtonId=""
                   onSuccess={handleUpgradeSuccess}
                   buttonText="Start Free Trial"
                   variant="outline"
@@ -219,7 +223,8 @@ const UpgradePrompts: React.FC<UpgradePromptsProps> = ({
                 />
                 <PayPalCheckout 
                   amount={PRODUCTS.PREMIUM_MONTHLY.price} 
-                  productName={PRODUCTS.PREMIUM_MONTHLY.name} 
+                  productName={PRODUCTS.PREMIUM_MONTHLY.name}
+                  hostedButtonId={PRODUCTS.PREMIUM_MONTHLY.hostedButtonId}
                   onSuccess={handleUpgradeSuccess}
                   buttonText={`Subscribe Now ($${PRODUCTS.PREMIUM_MONTHLY.price}/mo)`}
                   className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white"
