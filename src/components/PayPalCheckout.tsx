@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface PayPalCheckoutProps {
   amount: string;
@@ -26,29 +27,29 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
 }) => {
   const [isLoading, setIsLoading] = React.useState(false);
   const { user, isPremium } = useAuth();
+  const navigate = useNavigate();
 
   // Handle PayPal checkout
   const handlePayPalCheckout = () => {
+    // First check if user is logged in
     if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please log in to purchase premium features.",
         variant: "destructive",
       });
+      // Redirect to auth page
+      navigate('/auth');
       return;
     }
     
     setIsLoading(true);
     
-    // Use standard PayPal checkout URL
+    // Use PayPal.me links for direct checkout
     if (directPaymentUrl) {
       try {
-        // Add return URL parameter to the PayPal URL
-        const returnUrl = `${window.location.origin}/payment-success`;
-        const paypalUrl = `${directPaymentUrl}&return=${encodeURIComponent(returnUrl)}`;
-        
         // Open PayPal in a new window/tab
-        window.open(paypalUrl, '_blank');
+        window.open(directPaymentUrl, '_blank');
         
         toast({
           title: "Redirecting to PayPal",
