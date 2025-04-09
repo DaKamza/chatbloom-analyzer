@@ -48,6 +48,14 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
     // Use PayPal.me links for direct checkout
     if (directPaymentUrl) {
       try {
+        // Store purchase info in localStorage for retrieval after redirection
+        localStorage.setItem('pendingPurchase', JSON.stringify({
+          productName,
+          amount,
+          timestamp: new Date().toISOString(),
+          userId: user.id
+        }));
+        
         // Open PayPal in a new window/tab
         window.open(directPaymentUrl, '_blank');
         
@@ -89,23 +97,76 @@ const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({
   };
 
   // Handle manual verification (for demo purposes)
-  const handleManualVerification = () => {
+  const handleManualVerification = async () => {
     toast({
       title: "Processing...",
       description: "Verifying your payment...",
       variant: "default",
     });
     
-    // In production, you would verify the payment with your backend
-    setTimeout(() => {
+    try {
+      // Get the pending purchase from localStorage
+      const pendingPurchase = localStorage.getItem('pendingPurchase');
+      if (!pendingPurchase) {
+        throw new Error("No pending purchase found");
+      }
+
+      const purchase = JSON.parse(pendingPurchase);
+      
+      // Generate a unique transaction ID
+      const transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      
+      // Call the Supabase function to verify payment and update user status
+      const { data, error } = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+          },
+          body: JSON.stringify({
+            transaction_id: transactionId,
+            product_name: purchase.productName,
+            amount: purchase.amount,
+            user_id: user?.id
+          })
+        }
+      ).then(res => res.json());
+      
+      if (error) {
+        throw error;
+      }
+
+      // Clear the pending purchase
+      localStorage.removeItem('pendingPurchase');
+      
+      // Call the onSuccess callback if provided
       if (onSuccess) onSuccess();
       
+      // Show a success message
       toast({
         title: "Payment Successful!",
         description: "Your premium features have been unlocked.",
         variant: "default",
       });
-    }, 1500);
+      
+      // Redirect to thank you page
+      navigate('/payment-success', { 
+        state: { 
+          productName: purchase.productName,
+          features: data?.features || [] 
+        } 
+      });
+      
+    } catch (error) {
+      console.error("Payment verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description: "There was an error verifying your payment. Please contact support.",
+        variant: "destructive",
+      });
+    }
   };
 
   // If user is already premium, show a different message
