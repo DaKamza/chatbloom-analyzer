@@ -11,12 +11,6 @@
       var pathSegmentsToKeep = 1;
 
       var l = window.location;
-      var segmentCount = 0;
-      try {
-        segmentCount = l.pathname.split('/').filter(function(p) { return p !== ''; }).length;
-      } catch (e) { console.error(e); }
-      var repositoryName = l.pathname.split('/')[1];
-      
       l.replace(
         l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
         l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
@@ -27,5 +21,6 @@
     </script>
   </head>
   <body>
+    <p>Redirecting...</p>
   </body>
 </html>
