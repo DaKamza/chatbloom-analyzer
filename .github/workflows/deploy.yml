@@ -57,9 +57,9 @@ jobs:
       - name: List dist directory content
         run: ls -la dist/
       
-      # Make sure we're using the correct version of upload-pages-artifact
+      # Use the correct version of upload-pages-artifact
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2 # Updated to v2 to match the deploy-pages action
+        uses: actions/upload-pages-artifact@v1 # Downgraded to v1 as specified in the error message
         with:
           path: 'dist'
       
