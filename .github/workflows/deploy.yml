@@ -19,13 +19,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-and-deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-      
+  build:
+    name: Build
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -45,25 +41,30 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-      
       # Create .nojekyll file to prevent Jekyll processing
       - name: Create .nojekyll file
         run: |
           touch dist/.nojekyll
           echo "# This file prevents GitHub Pages from using Jekyll processing" > dist/.nojekyll
       
-      # Add a debug step to check the content of the dist directory
+      # Debug step to check the content
       - name: List dist directory content
         run: ls -la dist/
-      
-      # Explicitly use v2 of upload-pages-artifact (instead of v1)
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v2
+        
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: 'dist'
+          path: "dist"
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
       
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
