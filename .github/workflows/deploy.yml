@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main # Or your default branch
+  workflow_dispatch: # Allow manual triggering
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -57,11 +58,12 @@ jobs:
       - name: List dist directory content
         run: ls -la dist/
       
+      # Explicitly use v2 of upload-pages-artifact (instead of v1)
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           path: 'dist'
       
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v2
+        uses: actions/deploy-pages@v3
