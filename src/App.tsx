@@ -12,8 +12,8 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 const queryClient = new QueryClient();
 
-// Get the base URL from the environment or default to '/'
-const basename = import.meta.env.BASE_URL || '/';
+// Get the base URL from the environment or use the GitHub Pages path
+const basename = import.meta.env.PROD ? '/chatbloom-analyzer' : '/';
 
 const App = () => (
   <QueryClientProvider client={queryClient}>

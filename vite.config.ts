@@ -6,7 +6,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  base: './', // Sets base path to relative path for GitHub Pages compatibility
+  // Use the repository name as the base for GitHub Pages
+  base: '/chatbloom-analyzer/',
   server: {
     host: "::",
     port: 8080,
