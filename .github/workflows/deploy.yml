@@ -57,13 +57,11 @@ jobs:
       - name: List dist directory content
         run: ls -la dist/
       
-      # Use explicit version for upload-pages-artifact (v1)
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: 'dist'
       
-      # Use explicit version for deploy-pages (v2)
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
